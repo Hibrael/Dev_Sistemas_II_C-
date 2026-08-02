@@ -6,7 +6,7 @@ namespace AcademiaDoZe.Domain.ValueObjects
 {
     public class Email
     {
-        public string enderecoEmail { get; private set; }
+        public string EnderecoEmail { get; private set; }
 
         public Email(string valor)
         {

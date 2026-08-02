@@ -6,9 +6,9 @@ namespace AcademiaDoZe.Domain.Enums
 {
     public  enum MartriculaPlano
     {
-        mensal = 0,
-        trimestral = 1,
-        semestral = 2,
-        anual = 3,
+        Mensal = 0,
+        Trimestral = 1,
+        Semestral = 2,
+        Anual = 3,
     }
 }

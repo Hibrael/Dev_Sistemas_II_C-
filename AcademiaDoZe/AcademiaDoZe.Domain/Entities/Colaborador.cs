@@ -7,14 +7,14 @@ namespace AcademiaDoZe.Domain.Entities
 {
     public class Colaborador : Pessoa
     {
-        public ColaboradorTipos Tipo { get; private set; }
+        public ColaboradorTipo Tipo { get; private set; }
         public ColaboradorVinculo Vinculo { get; private set; }
         public DateTime DataAdmissao { get; private set; }
         public DateTime? DataDemissao { get; private set; }
         public decimal Salario { get; private set; }
 
         private Colaborador(string nome, Cpf cpf, string telefone, string email, DateTime dataNascimento, Endereco endereco,
-            ColaboradorTipos tipo, ColaboradorVinculo vinculo, DateTime dataAdmissao, decimal salario)
+            ColaboradorTipo tipo, ColaboradorVinculo vinculo, DateTime dataAdmissao, decimal salario)
             : base(nome, cpf, telefone, email, dataNascimento, endereco)
         {
             Tipo = tipo;
@@ -24,11 +24,11 @@ namespace AcademiaDoZe.Domain.Entities
         }
 
         public static Colaborador Registrar(string nome, Cpf cpf, string telefone, string email, DateTime dataNascimento, Endereco endereco,
-            ColaboradorTipos tipo, ColaboradorVinculo vinculo, DateTime dataAdmissao, decimal salario)
+            ColaboradorTipo tipo, ColaboradorVinculo vinculo, DateTime dataAdmissao, decimal salario)
         {
             ValidarDadosPessoais(nome, cpf, telefone, email, dataNascimento, endereco);
 
-            if (!Enum.IsDefined(typeof(ColaboradorTipos), tipo))
+            if (!Enum.IsDefined(typeof(ColaboradorTipo), tipo))
                 throw new ArgumentException("Tipo de colaborador inválido.");
 
             if (!Enum.IsDefined(typeof(ColaboradorVinculo), vinculo))
