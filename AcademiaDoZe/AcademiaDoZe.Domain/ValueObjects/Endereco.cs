@@ -7,8 +7,8 @@ using System.Text;
 
 namespace AcademiaDoZe.Domain.ValueObjects
 {
-    public class Endereco: Logradouro
-    {
+    public class Endereco
+        public Logradouro logradouro { get; set; }'
         public string NumeroCasa { get; set; }
         public string Complemento { get; set; }
     }
