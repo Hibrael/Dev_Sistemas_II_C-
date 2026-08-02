@@ -7,14 +7,14 @@ namespace AcademiaDoZe.Domain.Entities
     public class Matricula : Entity
     {
         public int AlunoId { get; private set; }
-        public MartriculaPlano Plano { get; private set; }
+        public MatriculaPlano Plano { get; private set; }
         public MatriculaRestricoes Restricoes { get; private set; }
         public DateTime DataInicio { get; private set; }
         public DateTime DataFim { get; private set; }
         public decimal Valor { get; private set; }
         public bool Ativa { get; private set; }
 
-        private Matricula(int alunoId, MartriculaPlano plano, MatriculaRestricoes restricoes, DateTime dataInicio, DateTime dataFim, decimal valor)
+        private Matricula(int alunoId, MatriculaPlano plano, MatriculaRestricoes restricoes, DateTime dataInicio, DateTime dataFim, decimal valor)
         {
             AlunoId = alunoId;
             Plano = plano;
@@ -25,12 +25,12 @@ namespace AcademiaDoZe.Domain.Entities
             Ativa = true;
         }
 
-        public static Matricula Criar(int alunoId, MartriculaPlano plano, MatriculaRestricoes restricoes, DateTime dataInicio, decimal valor)
+        public static Matricula Criar(int alunoId, MatriculaPlano plano, MatriculaRestricoes restricoes, DateTime dataInicio, decimal valor)
         {
             if (alunoId <= 0)
                 throw new ArgumentException("Aluno inválido.");
 
-            if (!Enum.IsDefined(typeof(MartriculaPlano), plano))
+            if (!Enum.IsDefined(typeof(MatriculaPlano), plano))
                 throw new ArgumentException("Plano de matrícula inválido.");
 
             if (valor <= 0)
@@ -52,10 +52,10 @@ namespace AcademiaDoZe.Domain.Entities
         {
             return plano switch
             {
-                MartriculaPlano.Mensal => dataInicio.AddMonths(1),
-                MartriculaPlano.Trimestral => dataInicio.AddMonths(3),
-                MartriculaPlano.Semestral => dataInicio.AddMonths(6),
-                MartriculaPlano.Anual => dataInicio.AddYears(1),
+                MatriculaPlano.Mensal => dataInicio.AddMonths(1),
+                MatriculaPlano.Trimestral => dataInicio.AddMonths(3),
+                MatriculaPlano.Semestral => dataInicio.AddMonths(6),
+                MatriculaPlano.Anual => dataInicio.AddYears(1),
                 _ => throw new ArgumentException("Plano de matrícula inválido.")
             };
         }
