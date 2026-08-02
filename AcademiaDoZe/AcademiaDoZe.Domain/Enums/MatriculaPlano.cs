@@ -4,7 +4,7 @@ using System.Text;
 
 namespace AcademiaDoZe.Domain.Enums
 {
-    public  enum MartriculaPlano
+    public  enum MatriculaPlano
     {
         Mensal = 0,
         Trimestral = 1,

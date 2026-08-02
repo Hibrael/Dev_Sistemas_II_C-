@@ -18,9 +18,9 @@ namespace AcademiaDoZe.Domain.ValueObjects
             if (!Regex.IsMatch(textoLimpo, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
                 throw new ArgumentException("E-mail inválido.");
 
-            enderecoEmail = textoLimpo.ToLowerInvariant();
+            EnderecoEmail = textoLimpo.ToLowerInvariant();
         }
 
-        public override string ToString() => enderecoEmail;
+        public override string ToString() => EnderecoEmail;
     }
 }

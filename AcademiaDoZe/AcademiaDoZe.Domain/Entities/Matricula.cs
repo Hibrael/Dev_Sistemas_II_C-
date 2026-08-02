@@ -52,10 +52,10 @@ namespace AcademiaDoZe.Domain.Entities
         {
             return plano switch
             {
-                MartriculaPlano.mensal => dataInicio.AddMonths(1),
-                MartriculaPlano.trimestral => dataInicio.AddMonths(3),
-                MartriculaPlano.semestral => dataInicio.AddMonths(6),
-                MartriculaPlano.anual => dataInicio.AddYears(1),
+                MartriculaPlano.Mensal => dataInicio.AddMonths(1),
+                MartriculaPlano.Trimestral => dataInicio.AddMonths(3),
+                MartriculaPlano.Semestral => dataInicio.AddMonths(6),
+                MartriculaPlano.Anual => dataInicio.AddYears(1),
                 _ => throw new ArgumentException("Plano de matrícula inválido.")
             };
         }

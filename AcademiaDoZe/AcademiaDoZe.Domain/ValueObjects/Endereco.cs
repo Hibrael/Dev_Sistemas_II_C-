@@ -12,7 +12,7 @@ namespace AcademiaDoZe.Domain.ValueObjects
         public Logradouro logradouro { get; set; }
         public string NumeroCasa { get; set; }
         public string? Complemento { get; set; }
-    }
+    
 
         private Endereco(Logradouro logradouro, string numeroCasa, string? complemento)
         {
@@ -32,3 +32,4 @@ namespace AcademiaDoZe.Domain.ValueObjects
             return new Endereco(logradouro, numeroCasa, complemento);
         }
     }
+}
