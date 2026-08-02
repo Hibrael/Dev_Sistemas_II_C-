@@ -1,4 +1,5 @@
-﻿using AcademiaDoZe.Domain.ValueObjects;
+﻿//Hibrael Andre Cidade Xavier
+using AcademiaDoZe.Domain.ValueObjects;
 using System;
 
 namespace AcademiaDoZe.Domain.Entities
