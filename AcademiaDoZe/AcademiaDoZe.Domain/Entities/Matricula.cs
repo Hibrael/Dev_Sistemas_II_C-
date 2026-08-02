@@ -48,7 +48,7 @@ namespace AcademiaDoZe.Domain.Entities
             Ativa = false;
         }
 
-        private static DateTime CalcularDataFim(DateTime dataInicio, MartriculaPlano plano)
+        private static DateTime CalcularDataFim(DateTime dataInicio, MatriculaPlano plano)
         {
             return plano switch
             {
