@@ -8,12 +8,12 @@ namespace AcademiaDoZe.Domain.ValueObjects
     {
         public string enderecoEmail { get; private set; }
 
-        public Email(string enderecoEmail)
+        public Email(string valor)
         {
-            if (string.IsNullOrWhiteSpace(enderecoEmail))
+            if (string.IsNullOrWhiteSpace(valor))
                 throw new ArgumentException("O e-mail não pode ser vazio.");
 
-            string textoLimpo = enderecoEmail.Trim();
+            string textoLimpo = valor.Trim();
 
             if (!Regex.IsMatch(textoLimpo, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
                 throw new ArgumentException("E-mail inválido.");

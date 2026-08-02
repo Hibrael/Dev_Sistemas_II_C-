@@ -4,7 +4,7 @@ using System.Text;
 
 namespace AcademiaDoZe.Domain.Enums
 {
-    public enum ColaboradorTipos
+    public enum ColaboradorTipo
     {
         Administrador = 0,
         Atendente = 1,
