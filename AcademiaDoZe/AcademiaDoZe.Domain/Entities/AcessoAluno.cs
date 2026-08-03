@@ -5,42 +5,19 @@ namespace AcademiaDoZe.Domain.Entities
 {
     public class AcessoAluno : Entity
     {
-        public int AlunoId { get; private set; }
-        public string Codigo { get; private set; }
-        public bool Ativo { get; private set; }
+        public Aluno Aluno { get; private set; }
+        public DateTime Datahora { get; private set; }
 
-        private AcessoAluno(int alunoId, string codigo)
+        private AcessoAluno(Aluno aluno)
         {
-            AlunoId = alunoId;
-            Codigo = codigo;
-            Ativo = true;
+            Aluno = aluno;
+            Datahora = DateTime.UtcNow;
         }
 
-        public static AcessoAluno Criar(int alunoId, string codigo)
+        public static AcessoAluno Criar(Aluno aluno)
         {
-            if (alunoId <= 0)
-                throw new ArgumentException("Aluno inválido.");
-
-            if (string.IsNullOrWhiteSpace(codigo))
-                throw new ArgumentException("Código de acesso é obrigatório.");
-
-            return new AcessoAluno(alunoId, codigo);
+            return new AcessoAluno(aluno);
         }
 
-        public void Bloquear()
-        {
-            if (!Ativo)
-                throw new InvalidOperationException("Acesso já está bloqueado.");
-
-            Ativo = false;
-        }
-
-        public void Liberar()
-        {
-            if (Ativo)
-                throw new InvalidOperationException("Acesso já está liberado.");
-
-            Ativo = true;
-        }
     }
 }
