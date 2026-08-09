@@ -1,49 +1,75 @@
-﻿//Hibrael Andre Cidade Xavier
+//Hibrael Andre Cidade Xavier
+using AcademiaDoZe.Domain.Common;
+using AcademiaDoZe.Domain.Services;
 using AcademiaDoZe.Domain.ValueObjects;
-using System;
 
 namespace AcademiaDoZe.Domain.Entities
 {
-    public class Logradouro : Entity
+    /// <summary>
+    /// Logradouro é uma Entity (possui Id/identidade própria) e não um Value Object porque,
+    /// na prática, o mesmo logradouro é compartilhado por vários endereços de alunos e
+    /// colaboradores diferentes — faz sentido cadastrá-lo e reutilizá-lo por identidade,
+    /// em vez de duplicar seus dados a cada Endereco criado.
+    /// </summary>
+    public sealed class Logradouro : Entity, IAggregateRoot
     {
-        public string NomeLogradouro { get; private set; }
         public Cep Cep { get; private set; }
-        public string Pais { get; private set; }
-        public string Cidade { get; private set; }
+        public string Nome { get; private set; }
         public string Bairro { get; private set; }
-        public string Rua { get; private set; }
+        public string Cidade { get; private set; }
+        public string Estado { get; private set; }
+        public string Pais { get; private set; }
 
-        private Logradouro(string nomeLogradouro, Cep cep, string pais, string cidade, string bairro, string rua)
+        private Logradouro(int id, Cep cep, string nome, string bairro, string cidade, string estado, string pais) : base(id)
         {
-            NomeLogradouro = nomeLogradouro;
             Cep = cep;
-            Pais = pais;
-            Cidade = cidade;
+            Nome = nome;
             Bairro = bairro;
-            Rua = rua;
+            Cidade = cidade;
+            Estado = estado;
+            Pais = pais;
         }
 
-        public static Logradouro Criar(string nomeLogradouro, Cep cep, string pais, string cidade, string bairro, string rua)
+        public static Result<Logradouro> Criar(int id, string cep, string nome, string bairro, string cidade, string estado, string pais)
         {
-            if (string.IsNullOrWhiteSpace(nomeLogradouro))
-                throw new ArgumentException("Nome do logradouro é obrigatório.");
+            var notificacoes = new List<Notification>();
 
-            if (cep is null)
-                throw new ArgumentException("CEP é obrigatório.");
+            var cepResult = Cep.Criar(cep);
+            if (cepResult.IsFailure)
+                notificacoes.AddRange(cepResult.Notifications);
 
-            if (string.IsNullOrWhiteSpace(pais))
-                throw new ArgumentException("País é obrigatório.");
+            if (NormalizadoService.TextoVazioOuNulo(nome))
+                notificacoes.Add(new Notification("Nome", "NOME_OBRIGATORIO"));
+            else
+                nome = NormalizadoService.LimparEspacos(nome);
 
-            if (string.IsNullOrWhiteSpace(cidade))
-                throw new ArgumentException("Cidade é obrigatória.");
+            if (NormalizadoService.TextoVazioOuNulo(bairro))
+                notificacoes.Add(new Notification("Bairro", "BAIRRO_OBRIGATORIO"));
+            else
+                bairro = NormalizadoService.LimparEspacos(bairro);
 
-            if (string.IsNullOrWhiteSpace(bairro))
-                throw new ArgumentException("Bairro é obrigatório.");
+            if (NormalizadoService.TextoVazioOuNulo(cidade))
+                notificacoes.Add(new Notification("Cidade", "CIDADE_OBRIGATORIO"));
+            else
+                cidade = NormalizadoService.LimparEspacos(cidade);
 
-            if (string.IsNullOrWhiteSpace(rua))
-                throw new ArgumentException("Rua é obrigatória.");
+            if (NormalizadoService.TextoVazioOuNulo(estado))
+                notificacoes.Add(new Notification("Estado", "ESTADO_OBRIGATORIO"));
+            else
+                estado = NormalizadoService.ParaMaiusculo(NormalizadoService.LimparTodosEspacos(estado));
 
-            return new Logradouro(nomeLogradouro, cep, pais, cidade, bairro, rua);
+            if (NormalizadoService.TextoVazioOuNulo(pais))
+                notificacoes.Add(new Notification("Pais", "PAIS_OBRIGATORIO"));
+            else
+                pais = NormalizadoService.LimparEspacos(pais);
+
+            if (notificacoes.Count != 0)
+                return Result<Logradouro>.Failure(notificacoes);
+
+            return Result<Logradouro>.Success(new Logradouro(id, cepResult.Value!, nome, bairro, cidade, estado, pais));
         }
     }
 }
+
+
+

@@ -1,65 +1,40 @@
-﻿//Hibrael Andre Cidade Xavier
+//Hibrael Andre Cidade Xavier
 using AcademiaDoZe.Domain.ValueObjects;
-using System;
 
 namespace AcademiaDoZe.Domain.Entities
 {
-    public class Pessoa : Entity
+    /// <summary>
+    /// Classe base para as pessoas que interagem com a Academia do Zé (Aluno e Colaborador),
+    /// concentrando os dados cadastrais e de acesso comuns a ambas.
+    ///
+    /// Pessoa é abstrata e NÃO possui um método "Criar" próprio: cada subclasse concentra
+    /// suas próprias regras de negócio (e, por isso, seu próprio método de fábrica estático)
+    /// e apenas repassa os valores já validados para este construtor protegido via base(...).
+    /// Isso evita uma validação "genérica" que teria que ser sobrescrita/duplicada por Aluno
+    /// e Colaborador sempre que suas regras específicas divergirem.
+    /// </summary>
+    public abstract class Pessoa : Entity
     {
         public string Nome { get; private set; }
         public Cpf Cpf { get; private set; }
-        public string Telefone { get; private set; }
-        public string Email { get; private set; }
-        public DateTime DataNascimento { get; private set; }
+        public DateOnly DataNascimento { get; private set; }
+        public Telefone Telefone { get; private set; }
+        public Email Email { get; private set; }
         public Endereco Endereco { get; private set; }
+        public Senha Senha { get; private set; }
+        public Arquivo Foto { get; private set; }
 
-        protected Pessoa(string nome, Cpf cpf, string telefone, string email, DateTime dataNascimento, Endereco endereco)
+        protected Pessoa(int id, string nome, Cpf cpf, DateOnly dataNascimento, Telefone telefone,
+            Email email, Endereco endereco, Senha senha, Arquivo foto) : base(id)
         {
             Nome = nome;
             Cpf = cpf;
+            DataNascimento = dataNascimento;
             Telefone = telefone;
             Email = email;
-            DataNascimento = dataNascimento;
             Endereco = endereco;
-        }
-
-        public static Pessoa Criar(string nome, Cpf cpf, string telefone, string email, DateTime dataNascimento, Endereco endereco)
-        {
-            ValidarDadosPessoais(nome, cpf, telefone, email, dataNascimento, endereco);
-            return new Pessoa(nome, cpf, telefone, email, dataNascimento, endereco);
-        }
-
-        protected static void ValidarDadosPessoais(string nome, Cpf cpf, string telefone, string email, DateTime dataNascimento, Endereco endereco)
-        {
-            if (string.IsNullOrWhiteSpace(nome) || nome.Trim().Length < 3)
-                throw new ArgumentException("Nome inválido: deve conter ao menos 3 caracteres.");
-
-            if (cpf is null)
-                throw new ArgumentException("CPF é obrigatório.");
-
-            if (string.IsNullOrWhiteSpace(telefone))
-                throw new ArgumentException("Telefone é obrigatório.");
-
-            if (string.IsNullOrWhiteSpace(email) || !email.Contains('@'))
-                throw new ArgumentException("E-mail inválido.");
-
-            if (dataNascimento.Date > DateTime.Today)
-                throw new ArgumentException("Data de nascimento não pode ser no futuro.");
-
-            if (CalcularIdade(dataNascimento) < 14)
-                throw new ArgumentException("Pessoa deve ter ao menos 14 anos.");
-
-            if (endereco is null)
-                throw new ArgumentException("Endereço é obrigatório.");
-        }
-
-        private static int CalcularIdade(DateTime dataNascimento)
-        {
-            var hoje = DateTime.Today;
-            var idade = hoje.Year - dataNascimento.Year;
-            if (dataNascimento.Date > hoje.AddYears(-idade))
-                idade--;
-            return idade;
+            Senha = senha;
+            Foto = foto;
         }
     }
 }

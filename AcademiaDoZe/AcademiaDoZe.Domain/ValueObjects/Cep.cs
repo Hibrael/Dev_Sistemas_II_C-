@@ -1,26 +1,43 @@
-﻿//Hibrael Andre Cidade Xavier
-using System;
-using System.Text.RegularExpressions;
+//Hibrael Andre Cidade Xavier
+using AcademiaDoZe.Domain.Common;
+using AcademiaDoZe.Domain.Services;
 
 namespace AcademiaDoZe.Domain.ValueObjects
 {
-    public class Cep
+    /// <summary>
+    /// Value Object que representa um CEP brasileiro: sem identidade própria,
+    /// imutável e igual a outro Cep se os valores forem iguais (garantido pelo uso de record).
+    /// </summary>
+    public sealed record Cep
     {
-        public string Numero { get; private set; }
+        public string Numero { get; }
 
-        public Cep(string numero)
+        private Cep(string numero) => Numero = numero;
+
+        public static Result<Cep> Criar(string numero)
         {
-            if (string.IsNullOrWhiteSpace(numero))
-                throw new ArgumentException("O CEP não pode ser vazio.");
+            var notificacoes = new List<Notification>();
 
-            string textoLimpo = numero.Replace("-", "").Replace(".", "").Trim();
+            if (NormalizadoService.TextoVazioOuNulo(numero))
+            {
+                notificacoes.Add(new Notification("Cep", "CEP_OBRIGATORIO"));
+                return Result<Cep>.Failure(notificacoes);
+            }
 
-            if (!Regex.IsMatch(textoLimpo, @"^\d{8}$"))
-                throw new ArgumentException("CEP inválido: deve conter 8 dígitos numéricos.");
+            var digitos = NormalizadoService.ApenasDigitos(numero);
 
-            Numero = textoLimpo;
+            if (digitos.Length != 8)
+                notificacoes.Add(new Notification("Cep", "CEP_INVALIDO"));
+
+            if (notificacoes.Count != 0)
+                return Result<Cep>.Failure(notificacoes);
+
+            return Result<Cep>.Success(new Cep(digitos));
         }
 
-        public override string ToString() => $"{Numero.Substring(0, 5)}-{Numero.Substring(5)}";
+        public override string ToString() => $"{Numero[..5]}-{Numero[5..]}";
     }
 }
+
+
+

@@ -1,22 +1,25 @@
-﻿//Hibrael Andre Cidade Xavier
-using System;
+//Hibrael Andre Cidade Xavier
+using AcademiaDoZe.Domain.Common;
 
 namespace AcademiaDoZe.Domain.Entities
 {
-    public class AcessoColaborador : Entity
+    /// <summary>Registro de um check-in/acesso de um Colaborador à academia.</summary>
+    public sealed class AcessoColaborador : Entity, IAggregateRoot
     {
         public Colaborador Colaborador { get; private set; }
         public DateTime DataHora { get; private set; }
 
-        private AcessoColaborador(Colaborador colaborador)
+        private AcessoColaborador(int id, Colaborador colaborador, DateTime dataHora) : base(id)
         {
             Colaborador = colaborador;
-            DataHora = DateTime.UtcNow  ;
+            DataHora = dataHora;
         }
 
-        public static AcessoColaborador Criar(Colaborador colaborador)
+        public static AcessoColaborador Criar(int id, Colaborador colaborador)
         {
-            return new AcessoColaborador(colaborador);
+            ArgumentNullException.ThrowIfNull(colaborador);
+
+            return new AcessoColaborador(id, colaborador, DateTime.UtcNow);
         }
     }
 }
