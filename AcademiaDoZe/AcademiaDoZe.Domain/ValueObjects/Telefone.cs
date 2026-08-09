@@ -1,31 +1,41 @@
-﻿//Hibrael Andre Cidade Xavier
-using System;
-using System.Text.RegularExpressions;
+//Hibrael Andre Cidade Xavier
+using AcademiaDoZe.Domain.Common;
+using AcademiaDoZe.Domain.Services;
 
 namespace AcademiaDoZe.Domain.ValueObjects
 {
-    public class Telefone
+    public sealed record Telefone
     {
-        public string Numero { get; private set; }
+        public string Numero { get; }
 
-        public Telefone(string numero)
+        private Telefone(string numero) => Numero = numero;
+
+        public static Result<Telefone> Criar(string numero)
         {
-            if (string.IsNullOrWhiteSpace(numero))
-                throw new ArgumentException("O telefone não pode ser vazio.");
+            var notificacoes = new List<Notification>();
 
-            string textoLimpo = Regex.Replace(numero, @"[^\d]", "");
+            if (NormalizadoService.TextoVazioOuNulo(numero))
+            {
+                notificacoes.Add(new Notification("Telefone", "TELEFONE_OBRIGATORIO"));
+                return Result<Telefone>.Failure(notificacoes);
+            }
 
-            if (textoLimpo.Length != 10 && textoLimpo.Length != 11)
-                throw new ArgumentException("Telefone inválido: deve conter 10 ou 11 dígitos, incluindo o DDD.");
+            var digitos = NormalizadoService.ApenasDigitos(numero);
 
-            Numero = textoLimpo;
+            if (digitos.Length != 10 && digitos.Length != 11)
+                notificacoes.Add(new Notification("Telefone", "TELEFONE_INVALIDO"));
+
+            if (notificacoes.Count != 0)
+                return Result<Telefone>.Failure(notificacoes);
+
+            return Result<Telefone>.Success(new Telefone(digitos));
         }
 
-        public override string ToString()
-        {
-            return Numero.Length == 11
-                ? $"({Numero.Substring(0, 2)}) {Numero.Substring(2, 5)}-{Numero.Substring(7)}"
-                : $"({Numero.Substring(0, 2)}) {Numero.Substring(2, 4)}-{Numero.Substring(6)}";
-        }
+        public override string ToString() => Numero.Length == 11
+            ? $"({Numero[..2]}) {Numero[2..7]}-{Numero[7..]}"
+            : $"({Numero[..2]}) {Numero[2..6]}-{Numero[6..]}";
     }
 }
+
+
+

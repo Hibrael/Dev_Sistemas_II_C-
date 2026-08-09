@@ -1,26 +1,63 @@
-﻿using AcademiaDoZe.Domain.ValueObjects;
-using System;
+//Hibrael Andre Cidade Xavier
+using AcademiaDoZe.Domain.Common;
+using AcademiaDoZe.Domain.Services;
+using AcademiaDoZe.Domain.ValueObjects;
 
 namespace AcademiaDoZe.Domain.Entities
 {
-    public class Aluno : Pessoa
+    public sealed class Aluno : Pessoa, IAggregateRoot
     {
-        public string Matricula { get; private set; }
-
-        private Aluno(string nome, Cpf cpf, string telefone, string email, DateTime dataNascimento, Endereco endereco, string matricula)
-            : base(nome, cpf, telefone, email, dataNascimento, endereco)
+        private Aluno(int id, string nome, Cpf cpf, DateOnly dataNascimento, Telefone telefone, Email email,
+            Endereco endereco, Senha senha, Arquivo foto)
+            : base(id, nome, cpf, dataNascimento, telefone, email, endereco, senha, foto)
         {
-            Matricula = matricula;
         }
 
-        public static Aluno MatricularAluno(string nome, Cpf cpf, string telefone, string email, DateTime dataNascimento, Endereco endereco, string matricula)
+        public static Result<Aluno> Criar(int id, string nome, string cpf, DateOnly dataNascimento,
+            string telefone, string email, Logradouro endereco, string numeroCasa, string? complemento,
+            string senha, Arquivo foto)
         {
-            ValidarDadosPessoais(nome, cpf, telefone, email, dataNascimento, endereco);
+            var notificacoes = new List<Notification>();
 
-            if (string.IsNullOrWhiteSpace(matricula))
-                throw new ArgumentException("Matrícula é obrigatória.");
+            if (NormalizadoService.TextoVazioOuNulo(nome))
+                notificacoes.Add(new Notification("Nome", "NOME_OBRIGATORIO"));
+            else
+                nome = NormalizadoService.LimparEspacos(nome);
 
-            return new Aluno(nome, cpf, telefone, email, dataNascimento, endereco, matricula);
+            if (dataNascimento == default)
+                notificacoes.Add(new Notification("DataNascimento", "DATA_NASCIMENTO_OBRIGATORIO"));
+            else if (dataNascimento > DateOnly.FromDateTime(DateTime.Today.AddYears(-14)))
+
+                notificacoes.Add(new Notification("DataNascimento", "DATA_NASCIMENTO_MINIMA_INVALIDA"));
+
+            if (foto is null)
+                notificacoes.Add(new Notification("Foto", "FOTO_OBRIGATORIA"));
+
+            var cpfResult = Cpf.Criar(cpf);
+            if (cpfResult.IsFailure) notificacoes.AddRange(cpfResult.Notifications);
+
+            var telefoneResult = Telefone.Criar(telefone);
+            if (telefoneResult.IsFailure) notificacoes.AddRange(telefoneResult.Notifications);
+
+            var emailResult = Email.Criar(email);
+            if (emailResult.IsFailure) notificacoes.AddRange(emailResult.Notifications);
+
+            var senhaResult = Senha.Criar(senha);
+            if (senhaResult.IsFailure) notificacoes.AddRange(senhaResult.Notifications);
+
+            var enderecoResult = Endereco.Criar(endereco, numeroCasa, complemento);
+            if (enderecoResult.IsFailure) notificacoes.AddRange(enderecoResult.Notifications);
+
+            if (notificacoes.Count != 0)
+                return Result<Aluno>.Failure(notificacoes);
+
+            var aluno = new Aluno(id, nome, cpfResult.Value!, dataNascimento, telefoneResult.Value!,
+                emailResult.Value!, enderecoResult.Value!, senhaResult.Value!, foto!);
+
+            return Result<Aluno>.Success(aluno);
         }
     }
 }
+
+
+

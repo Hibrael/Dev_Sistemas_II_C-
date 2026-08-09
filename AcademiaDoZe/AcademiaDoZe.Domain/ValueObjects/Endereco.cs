@@ -1,18 +1,19 @@
-﻿//Hibrael Andre Cidade Xavier
+//Hibrael Andre Cidade Xavier
+using AcademiaDoZe.Domain.Common;
 using AcademiaDoZe.Domain.Entities;
-using AcademiaDoZe.Domain.Enums;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using AcademiaDoZe.Domain.Services;
 
 namespace AcademiaDoZe.Domain.ValueObjects
 {
-    public class Endereco
+    /// <summary>
+    /// Value Object que compõe um Logradouro (já validado, com identidade própria) com os
+    /// dados que variam por pessoa: número da casa/apartamento e complemento.
+    /// </summary>
+    public sealed record Endereco
     {
-        public Logradouro Logradouro { get; set; }
-        public string NumeroCasa { get; set; }
-        public string? Complemento { get; set; }
-    
+        public Logradouro Logradouro { get; }
+        public string NumeroCasa { get; }
+        public string? Complemento { get; }
 
         private Endereco(Logradouro logradouro, string numeroCasa, string? complemento)
         {
@@ -21,15 +22,33 @@ namespace AcademiaDoZe.Domain.ValueObjects
             Complemento = complemento;
         }
 
-        public static Endereco Adicioanr(Logradouro logradouro, string numeroCasa, string? complemento = null)
+        public static Result<Endereco> Criar(Logradouro logradouro, string numeroCasa, string? complemento = null)
         {
+            var notificacoes = new List<Notification>();
+
             if (logradouro is null)
-                throw new ArgumentException("Logradouro é obrigatório.");
+                notificacoes.Add(new Notification("Logradouro", "LOGRADOURO_OBRIGATORIO"));
 
-            if (string.IsNullOrWhiteSpace(numeroCasa))
-                throw new ArgumentException("Número da casa é obrigatório.");
+            if (NormalizadoService.TextoVazioOuNulo(numeroCasa))
+                notificacoes.Add(new Notification("NumeroCasa", "NUMERO_CASA_OBRIGATORIO"));
+            else
+                numeroCasa = NormalizadoService.LimparEspacos(numeroCasa);
 
-            return new Endereco(logradouro, numeroCasa, complemento);
+            if (!NormalizadoService.TextoVazioOuNulo(complemento))
+                complemento = NormalizadoService.LimparEspacos(complemento!);
+
+            if (notificacoes.Count != 0)
+                return Result<Endereco>.Failure(notificacoes);
+
+            return Result<Endereco>.Success(new Endereco(logradouro!, numeroCasa, complemento));
         }
+
+        public override string ToString() =>
+            Complemento is null
+                ? $"{Logradouro.Nome}, {NumeroCasa}"
+                : $"{Logradouro.Nome}, {NumeroCasa} - {Complemento}";
     }
 }
+
+
+

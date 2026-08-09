@@ -1,14 +1,15 @@
-﻿//Hibrael Andre Cidade Xavier
-using System;
+//Hibrael Andre Cidade Xavier
 using System.Security.Cryptography;
 using System.Text;
+using AcademiaDoZe.Domain.Common;
+using AcademiaDoZe.Domain.Services;
 
 namespace AcademiaDoZe.Domain.ValueObjects
 {
-    public class Senha
+    public sealed record Senha
     {
-        public string Hash { get; private set; }
-        public string Salt { get; private set; }
+        public string Hash { get; }
+        public string Salt { get; }
 
         private Senha(string hash, string salt)
         {
@@ -16,30 +17,35 @@ namespace AcademiaDoZe.Domain.ValueObjects
             Salt = salt;
         }
 
-        public static Senha Criar(string senhaTextoPlano)
+        /// <summary>Cria uma nova senha a partir de texto puro digitado pelo usuário, validando a força mínima.</summary>
+        public static Result<Senha> Criar(string senhaTextoPlano)
         {
-            if (string.IsNullOrWhiteSpace(senhaTextoPlano) || senhaTextoPlano.Length < 8)
-                throw new ArgumentException("A senha deve ter ao menos 8 caracteres.");
+            var notificacoes = new List<Notification>();
 
-            if (!ContemLetraENumero(senhaTextoPlano))
-                throw new ArgumentException("A senha deve conter ao menos uma letra e um número.");
+            if (NormalizadoService.TextoVazioOuNulo(senhaTextoPlano) || senhaTextoPlano.Length < 8)
+                notificacoes.Add(new Notification("Senha", "SENHA_TAMANHO_MINIMO"));
+            else if (!ContemLetraENumero(senhaTextoPlano))
+                notificacoes.Add(new Notification("Senha", "SENHA_REQUISITOS_INVALIDOS"));
+
+            if (notificacoes.Count != 0)
+                return Result<Senha>.Failure(notificacoes);
 
             var salt = GerarSalt();
             var hash = GerarHash(senhaTextoPlano, salt);
-            return new Senha(hash, salt);
+            return Result<Senha>.Success(new Senha(hash, salt));
         }
 
         public static Senha Restaurar(string hash, string salt)
         {
-            if (string.IsNullOrWhiteSpace(hash) || string.IsNullOrWhiteSpace(salt))
-                throw new ArgumentException("Hash e salt são obrigatórios para restaurar a senha.");
+            ArgumentException.ThrowIfNullOrWhiteSpace(hash);
+            ArgumentException.ThrowIfNullOrWhiteSpace(salt);
 
             return new Senha(hash, salt);
         }
 
         public bool Verificar(string senhaTextoPlano)
         {
-            if (string.IsNullOrWhiteSpace(senhaTextoPlano))
+            if (NormalizadoService.TextoVazioOuNulo(senhaTextoPlano))
                 return false;
 
             return GerarHash(senhaTextoPlano, Salt) == Hash;
@@ -47,8 +53,8 @@ namespace AcademiaDoZe.Domain.ValueObjects
 
         private static bool ContemLetraENumero(string senha)
         {
-            bool temLetra = false;
-            bool temNumero = false;
+            var temLetra = false;
+            var temNumero = false;
 
             foreach (var caractere in senha)
             {
@@ -73,3 +79,6 @@ namespace AcademiaDoZe.Domain.ValueObjects
         }
     }
 }
+
+
+

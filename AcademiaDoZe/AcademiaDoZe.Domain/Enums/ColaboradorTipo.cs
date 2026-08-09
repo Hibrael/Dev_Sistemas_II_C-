@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
+//Hibrael Andre Cidade Xavier
 namespace AcademiaDoZe.Domain.Enums
 {
     public enum ColaboradorTipo

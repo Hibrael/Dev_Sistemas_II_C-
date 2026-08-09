@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
+//Hibrael Andre Cidade Xavier
 namespace AcademiaDoZe.Domain.Enums
 {
-    public  enum MatriculaPlano
+    public enum MatriculaPlano
     {
         Mensal = 0,
         Trimestral = 1,

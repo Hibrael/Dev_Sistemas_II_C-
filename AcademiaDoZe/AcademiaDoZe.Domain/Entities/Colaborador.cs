@@ -1,60 +1,113 @@
-﻿//Hibrael Andre Cidade Xavier
+//Hibrael Andre Cidade Xavier
+using AcademiaDoZe.Domain.Common;
 using AcademiaDoZe.Domain.Enums;
+using AcademiaDoZe.Domain.Exceptions;
+using AcademiaDoZe.Domain.Services;
 using AcademiaDoZe.Domain.ValueObjects;
-using System;
 
 namespace AcademiaDoZe.Domain.Entities
 {
-    public class Colaborador : Pessoa
+    public sealed class Colaborador : Pessoa, IAggregateRoot
     {
+        public DateOnly DataAdmissao { get; private set; }
+        public DateOnly? DataDemissao { get; private set; }
         public ColaboradorTipo Tipo { get; private set; }
         public ColaboradorVinculo Vinculo { get; private set; }
-        public DateTime DataAdmissao { get; private set; }
-        public DateTime? DataDemissao { get; private set; }
+
+        // Campos adicionais ao exemplo do material: cobrem regras de folha de pagamento
+        // (salário) já presentes na versão anterior do projeto e mantidas aqui.
         public decimal Salario { get; private set; }
 
-        private Colaborador(string nome, Cpf cpf, string telefone, string email, DateTime dataNascimento, Endereco endereco,
-            ColaboradorTipo tipo, ColaboradorVinculo vinculo, DateTime dataAdmissao, decimal salario)
-            : base(nome, cpf, telefone, email, dataNascimento, endereco)
+        private Colaborador(int id, string nome, Cpf cpf, DateOnly dataNascimento, Telefone telefone, Email email,
+            Endereco endereco, Senha senha, Arquivo foto, DateOnly dataAdmissao, ColaboradorTipo tipo,
+            ColaboradorVinculo vinculo, decimal salario)
+            : base(id, nome, cpf, dataNascimento, telefone, email, endereco, senha, foto)
         {
+            DataAdmissao = dataAdmissao;
             Tipo = tipo;
             Vinculo = vinculo;
-            DataAdmissao = dataAdmissao;
             Salario = salario;
         }
 
-        public static Colaborador Registrar(string nome, Cpf cpf, string telefone, string email, DateTime dataNascimento, Endereco endereco,
-            ColaboradorTipo tipo, ColaboradorVinculo vinculo, DateTime dataAdmissao, decimal salario)
+        public static Result<Colaborador> Criar(int id, string nome, string cpf, DateOnly dataNascimento,
+            string telefone, string email, Logradouro endereco, string numeroCasa, string? complemento,
+            string senha, Arquivo foto, DateOnly dataAdmissao, ColaboradorTipo tipo, ColaboradorVinculo vinculo,
+            decimal salario)
         {
-            ValidarDadosPessoais(nome, cpf, telefone, email, dataNascimento, endereco);
+            var notificacoes = new List<Notification>();
 
-            if (!Enum.IsDefined(typeof(ColaboradorTipo), tipo))
-                throw new ArgumentException("Tipo de colaborador inválido.");
+            if (NormalizadoService.TextoVazioOuNulo(nome))
+                notificacoes.Add(new Notification("Nome", "NOME_OBRIGATORIO"));
+            else
+                nome = NormalizadoService.LimparEspacos(nome);
 
-            if (!Enum.IsDefined(typeof(ColaboradorVinculo), vinculo))
-                throw new ArgumentException("Vínculo de colaborador inválido.");
+            if (dataNascimento == default)
+                notificacoes.Add(new Notification("DataNascimento", "DATA_NASCIMENTO_OBRIGATORIO"));
+            else if (dataNascimento > DateOnly.FromDateTime(DateTime.Today.AddYears(-12)))
+                // Valor conforme demonstrado no material; revisar se a idade mínima real
+                // para colaborador na Academia do Zé deve ser 14, 16 ou 18 anos.
+                notificacoes.Add(new Notification("DataNascimento", "DATA_NASCIMENTO_MINIMA_INVALIDA"));
 
-            if (dataAdmissao.Date > DateTime.Today)
-                throw new ArgumentException("Data de admissão não pode ser no futuro.");
+            if (dataAdmissao == default)
+                notificacoes.Add(new Notification("DataAdmissao", "DATA_ADMISSAO_OBRIGATORIO"));
+            else if (dataAdmissao > DateOnly.FromDateTime(DateTime.Today))
+                notificacoes.Add(new Notification("DataAdmissao", "DATA_ADMISSAO_MAIOR_ATUAL"));
+
+            if (!Enum.IsDefined(tipo))
+                notificacoes.Add(new Notification("Tipo", "TIPO_COLABORADOR_INVALIDO"));
+
+            if (!Enum.IsDefined(vinculo))
+                notificacoes.Add(new Notification("Vinculo", "VINCULO_COLABORADOR_INVALIDO"));
+
+            if (Enum.IsDefined(tipo) && Enum.IsDefined(vinculo) && tipo == ColaboradorTipo.Administrador && vinculo != ColaboradorVinculo.CLT)
+                notificacoes.Add(new Notification("Vinculo", "ADMINISTRADOR_CLT_INVALIDO"));
 
             if (salario <= 0)
-                throw new ArgumentException("Salário deve ser maior que zero.");
+                notificacoes.Add(new Notification("Salario", "SALARIO_INVALIDO"));
 
-            return new Colaborador(nome, cpf, telefone, email, dataNascimento, endereco, tipo, vinculo, dataAdmissao, salario);
+            if (foto is null)
+                notificacoes.Add(new Notification("Foto", "FOTO_OBRIGATORIA"));
+
+            // Instanciação e validação via Value Objects
+            var cpfResult = Cpf.Criar(cpf);
+            if (cpfResult.IsFailure) notificacoes.AddRange(cpfResult.Notifications);
+
+            var telefoneResult = Telefone.Criar(telefone);
+            if (telefoneResult.IsFailure) notificacoes.AddRange(telefoneResult.Notifications);
+
+            var emailResult = Email.Criar(email);
+            if (emailResult.IsFailure) notificacoes.AddRange(emailResult.Notifications);
+
+            var senhaResult = Senha.Criar(senha);
+            if (senhaResult.IsFailure) notificacoes.AddRange(senhaResult.Notifications);
+
+            var enderecoResult = Endereco.Criar(endereco, numeroCasa, complemento);
+            if (enderecoResult.IsFailure) notificacoes.AddRange(enderecoResult.Notifications);
+
+            if (notificacoes.Count != 0)
+                return Result<Colaborador>.Failure(notificacoes);
+
+            var colaborador = new Colaborador(id, nome, cpfResult.Value!, dataNascimento, telefoneResult.Value!,
+                emailResult.Value!, enderecoResult.Value!, senhaResult.Value!, foto!, dataAdmissao, tipo, vinculo, salario);
+
+            return Result<Colaborador>.Success(colaborador);
         }
 
-        public void Desligar(DateTime dataDemissao)
+        public void Desligar(DateOnly dataDemissao)
         {
             if (DataDemissao is not null)
-                throw new InvalidOperationException("Colaborador já foi demitido.");
+                throw new DomainException("Colaborador já foi demitido.");
 
-            if (dataDemissao.Date < DataAdmissao.Date)
-                throw new ArgumentException("Data de demissão não pode ser anterior à data de admissão.");
+            if (dataDemissao < DataAdmissao)
+                throw new DomainException("Data de demissão não pode ser anterior à data de admissão.");
 
-            if (dataDemissao.Date > DateTime.Today)
-                throw new ArgumentException("Data de demissão não pode ser no futuro.");
+            if (dataDemissao > DateOnly.FromDateTime(DateTime.Today))
+                throw new DomainException("Data de demissão não pode ser no futuro.");
 
             DataDemissao = dataDemissao;
         }
     }
 }
+
+
+

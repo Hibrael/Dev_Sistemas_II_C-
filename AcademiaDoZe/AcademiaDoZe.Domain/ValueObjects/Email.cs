@@ -1,26 +1,43 @@
-﻿//Hibrael Andre Cidade Xavier
-using System;
+//Hibrael Andre Cidade Xavier
 using System.Text.RegularExpressions;
+using AcademiaDoZe.Domain.Common;
+using AcademiaDoZe.Domain.Services;
 
 namespace AcademiaDoZe.Domain.ValueObjects
 {
-    public class Email
+    public sealed partial record Email
     {
-        public string EnderecoEmail { get; private set; }
+        public string EnderecoEmail { get; }
 
-        public Email(string valor)
+        private Email(string endereco) => EnderecoEmail = endereco;
+
+        public static Result<Email> Criar(string endereco)
         {
-            if (string.IsNullOrWhiteSpace(valor))
-                throw new ArgumentException("O e-mail não pode ser vazio.");
+            var notificacoes = new List<Notification>();
 
-            string textoLimpo = valor.Trim();
+            if (NormalizadoService.TextoVazioOuNulo(endereco))
+            {
+                notificacoes.Add(new Notification("Email", "EMAIL_OBRIGATORIO"));
+                return Result<Email>.Failure(notificacoes);
+            }
 
-            if (!Regex.IsMatch(textoLimpo, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
-                throw new ArgumentException("E-mail inválido.");
+            var textoLimpo = NormalizadoService.ParaMinusculo(NormalizadoService.LimparTodosEspacos(endereco));
 
-            EnderecoEmail = textoLimpo.ToLowerInvariant();
+            if (!FormatoEmailRegex().IsMatch(textoLimpo))
+                notificacoes.Add(new Notification("Email", "EMAIL_INVALIDO"));
+
+            if (notificacoes.Count != 0)
+                return Result<Email>.Failure(notificacoes);
+
+            return Result<Email>.Success(new Email(textoLimpo));
         }
 
         public override string ToString() => EnderecoEmail;
+
+        [GeneratedRegex(@"^[^@.]+@[^@.]+.[^@.]+$")]
+        private static partial Regex FormatoEmailRegex();
     }
 }
+
+
+

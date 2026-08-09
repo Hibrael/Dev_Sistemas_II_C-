@@ -1,97 +1,72 @@
-﻿//Hibrael Andre Cidade Xavier
-using System;
-using System.Collections.Generic;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
+//Hibrael Andre Cidade Xavier
+using AcademiaDoZe.Domain.Common;
+using AcademiaDoZe.Domain.Services;
 
 namespace AcademiaDoZe.Domain.ValueObjects
 {
-    public class Cpf
+
+    public sealed record Cpf
     {
-        public string Numero { get; private set; }
+        public string Numero { get; }
 
-        public Cpf(string numero)
+        private Cpf(string numero) => Numero = numero;
+
+        public static Result<Cpf> Criar(string numero)
         {
-            if (string.IsNullOrWhiteSpace(numero))
+            var notificacoes = new List<Notification>();
+
+            if (NormalizadoService.TextoVazioOuNulo(numero))
             {
-                throw new ArgumentException("O CPF não pode ser vazio");
+                notificacoes.Add(new Notification("Cpf", "CPF_OBRIGATORIO"));
+                return Result<Cpf>.Failure(notificacoes);
             }
 
-            string textoLimpo = numero.Replace(".", "").Replace("-", "");
+            var digitos = NormalizadoService.ApenasDigitos(numero);
 
-            if (!ValidarCpf(textoLimpo))
-            {
-                throw new ArgumentException("CPF inválido.");
-            }
+            if (!ValidarCpf(digitos))
+                notificacoes.Add(new Notification("Cpf", "CPF_INVALIDO"));
 
-            Numero = textoLimpo;
+            if (notificacoes.Count != 0)
+                return Result<Cpf>.Failure(notificacoes);
+
+            return Result<Cpf>.Success(new Cpf(digitos));
         }
 
-        private bool ValidarCpf(string cpf)
+        private static bool ValidarCpf(string cpf)
         {
-            if (cpf is null || cpf.Length != 11)
-            {
+            if (cpf.Length != 11)
                 return false;
-            }
+
 
             if (new string(cpf[0], 11) == cpf)
-            {
                 return false;
-            }
 
-            int soma = SomaCpf(cpf, 9, 10);
-            int digitoVerificador = GerarDigito(soma);
-            bool primeiroDigitoValido = ValidarDigito(cpf, 9, digitoVerificador);
-            if (!primeiroDigitoValido)
-            {
+            var primeiroDigito = CalcularDigitoVerificador(cpf, 9);
+            if (primeiroDigito != cpf[9] - '0')
                 return false;
-            }
-            soma = SomaCpf(cpf, 10, 11);
-            digitoVerificador = GerarDigito(soma);
-            bool segundoDigitoValido = ValidarDigito(cpf, 10, digitoVerificador);
-            
-            if (!segundoDigitoValido)
+
+            var segundoDigito = CalcularDigitoVerificador(cpf, 10);
+            return segundoDigito == cpf[10] - '0';
+        }
+
+        private static int CalcularDigitoVerificador(string cpf, int tamanho)
+        {
+            var soma = 0;
+            var peso = tamanho + 1;
+
+            for (var i = 0; i < tamanho; i++)
             {
-                return false;
-            }
-            return true;
-        }
-
-        private int GerarDigito(int soma)
-        {
-        int digitoVerificador = soma % 11;
-        if (digitoVerificador < 2)
-        {
-            return 0;
-
-        }
-        else
-        {
-            return 11 - digitoVerificador;
-        }
-
-       
-        }
-
-        private int SomaCpf(string cpf, int tamanho, int peso)
-        {
-            int soma = 0;
-            for (int i =0; i<tamanho; i++)
-            {
-                int numeroAtual = int.Parse(cpf[i].ToString());
-                soma += numeroAtual * peso;
+                soma += (cpf[i] - '0') * peso;
                 peso--;
             }
-            return soma;
+
+            var resto = soma % 11;
+            return resto < 2 ? 0 : 11 - resto;
         }
 
-        private bool ValidarDigito(string cpf, int posicao, int digitoVerificador)
-        {
-            int digito = int.Parse(cpf[posicao].ToString());
-            return digitoVerificador == digito;
-        }
-
-
+        public override string ToString() =>
+            $"{Numero[..3]}.{Numero[3..6]}.{Numero[6..9]}-{Numero[9..]}";
     }
 }
-    
+
+
