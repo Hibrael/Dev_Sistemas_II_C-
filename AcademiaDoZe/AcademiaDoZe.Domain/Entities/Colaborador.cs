@@ -34,55 +34,55 @@ namespace AcademiaDoZe.Domain.Entities
             string senha, Arquivo foto, DateOnly dataAdmissao, ColaboradorTipo tipo, ColaboradorVinculo vinculo,
             decimal salario)
         {
-            var notificacoes = new List<Notification>();
+            var notificacoes = new List<Notificacoes>();
 
             if (NormalizadoService.TextoVazioOuNulo(nome))
-                notificacoes.Add(new Notification("Nome", "NOME_OBRIGATORIO"));
+                notificacoes.Add(new Notificacoes("Nome", "NOME_OBRIGATORIO"));
             else
                 nome = NormalizadoService.LimparEspacos(nome);
 
             if (dataNascimento == default)
-                notificacoes.Add(new Notification("DataNascimento", "DATA_NASCIMENTO_OBRIGATORIO"));
+                notificacoes.Add(new Notificacoes("DataNascimento", "DATA_NASCIMENTO_OBRIGATORIO"));
             else if (dataNascimento > DateOnly.FromDateTime(DateTime.Today.AddYears(-12)))
                 // Valor conforme demonstrado no material; revisar se a idade mínima real
                 // para colaborador na Academia do Zé deve ser 14, 16 ou 18 anos.
-                notificacoes.Add(new Notification("DataNascimento", "DATA_NASCIMENTO_MINIMA_INVALIDA"));
+                notificacoes.Add(new Notificacoes("DataNascimento", "DATA_NASCIMENTO_MINIMA_INVALIDA"));
 
             if (dataAdmissao == default)
-                notificacoes.Add(new Notification("DataAdmissao", "DATA_ADMISSAO_OBRIGATORIO"));
+                notificacoes.Add(new Notificacoes("DataAdmissao", "DATA_ADMISSAO_OBRIGATORIO"));
             else if (dataAdmissao > DateOnly.FromDateTime(DateTime.Today))
-                notificacoes.Add(new Notification("DataAdmissao", "DATA_ADMISSAO_MAIOR_ATUAL"));
+                notificacoes.Add(new Notificacoes("DataAdmissao", "DATA_ADMISSAO_MAIOR_ATUAL"));
 
             if (!Enum.IsDefined(tipo))
-                notificacoes.Add(new Notification("Tipo", "TIPO_COLABORADOR_INVALIDO"));
+                notificacoes.Add(new Notificacoes("Tipo", "TIPO_COLABORADOR_INVALIDO"));
 
             if (!Enum.IsDefined(vinculo))
-                notificacoes.Add(new Notification("Vinculo", "VINCULO_COLABORADOR_INVALIDO"));
+                notificacoes.Add(new Notificacoes("Vinculo", "VINCULO_COLABORADOR_INVALIDO"));
 
             if (Enum.IsDefined(tipo) && Enum.IsDefined(vinculo) && tipo == ColaboradorTipo.Administrador && vinculo != ColaboradorVinculo.CLT)
-                notificacoes.Add(new Notification("Vinculo", "ADMINISTRADOR_CLT_INVALIDO"));
+                notificacoes.Add(new Notificacoes("Vinculo", "ADMINISTRADOR_CLT_INVALIDO"));
 
             if (salario <= 0)
-                notificacoes.Add(new Notification("Salario", "SALARIO_INVALIDO"));
+                notificacoes.Add(new Notificacoes("Salario", "SALARIO_INVALIDO"));
 
             if (foto is null)
-                notificacoes.Add(new Notification("Foto", "FOTO_OBRIGATORIA"));
+                notificacoes.Add(new Notificacoes("Foto", "FOTO_OBRIGATORIA"));
 
             // Instanciação e validação via Value Objects
             var cpfResult = Cpf.Criar(cpf);
-            if (cpfResult.IsFailure) notificacoes.AddRange(cpfResult.Notifications);
+            if (cpfResult.IsFailure) notificacoes.AddRange(cpfResult.Notificacoes);
 
             var telefoneResult = Telefone.Criar(telefone);
-            if (telefoneResult.IsFailure) notificacoes.AddRange(telefoneResult.Notifications);
+            if (telefoneResult.IsFailure) notificacoes.AddRange(telefoneResult.Notificacoes);
 
             var emailResult = Email.Criar(email);
-            if (emailResult.IsFailure) notificacoes.AddRange(emailResult.Notifications);
+            if (emailResult.IsFailure) notificacoes.AddRange(emailResult.Notificacoes);
 
             var senhaResult = Senha.Criar(senha);
-            if (senhaResult.IsFailure) notificacoes.AddRange(senhaResult.Notifications);
+            if (senhaResult.IsFailure) notificacoes.AddRange(senhaResult.Notificacoes);
 
             var enderecoResult = Endereco.Criar(endereco, numeroCasa, complemento);
-            if (enderecoResult.IsFailure) notificacoes.AddRange(enderecoResult.Notifications);
+            if (enderecoResult.IsFailure) notificacoes.AddRange(enderecoResult.Notificacoes);
 
             if (notificacoes.Count != 0)
                 return Result<Colaborador>.Failure(notificacoes);

@@ -34,13 +34,13 @@ namespace AcademiaDoZe.Domain.ValueObjects
 
         public static Result<Arquivo> Criar(string nome, byte[] conteudo)
         {
-            var notificacoes = new List<Notification>();
+            var notificacoes = new List<Notificacoes>();
 
             if (NormalizadoService.TextoVazioOuNulo(nome))
-                notificacoes.Add(new Notification("Nome", "ARQUIVO_NOME_OBRIGATORIO"));
+                notificacoes.Add(new Notificacoes("Nome", "ARQUIVO_NOME_OBRIGATORIO"));
 
             if (conteudo is null || conteudo.Length == 0)
-                notificacoes.Add(new Notification("Conteudo", "ARQUIVO_CONTEUDO_OBRIGATORIO"));
+                notificacoes.Add(new Notificacoes("Conteudo", "ARQUIVO_CONTEUDO_OBRIGATORIO"));
 
             if (notificacoes.Count != 0)
                 return Result<Arquivo>.Failure(notificacoes);
@@ -48,10 +48,10 @@ namespace AcademiaDoZe.Domain.ValueObjects
             var extensao = NormalizadoService.ParaMinusculo(Path.GetExtension(nome));
 
             if (!ExtensoesPermitidas.Contains(extensao))
-                notificacoes.Add(new Notification("Extensao", "ARQUIVO_EXTENSAO_INVALIDA"));
+                notificacoes.Add(new Notificacoes("Extensao", "ARQUIVO_EXTENSAO_INVALIDA"));
 
             if (conteudo!.LongLength > TamanhoMaximoBytes)
-                notificacoes.Add(new Notification("Conteudo", "ARQUIVO_TAMANHO_EXCEDIDO"));
+                notificacoes.Add(new Notificacoes("Conteudo", "ARQUIVO_TAMANHO_EXCEDIDO"));
 
             if (notificacoes.Count != 0)
                 return Result<Arquivo>.Failure(notificacoes);

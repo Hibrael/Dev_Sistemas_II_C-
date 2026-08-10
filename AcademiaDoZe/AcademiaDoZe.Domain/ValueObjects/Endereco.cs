@@ -24,13 +24,13 @@ namespace AcademiaDoZe.Domain.ValueObjects
 
         public static Result<Endereco> Criar(Logradouro logradouro, string numeroCasa, string? complemento = null)
         {
-            var notificacoes = new List<Notification>();
+            var notificacoes = new List<Notificacoes>();
 
             if (logradouro is null)
-                notificacoes.Add(new Notification("Logradouro", "LOGRADOURO_OBRIGATORIO"));
+                notificacoes.Add(new Notificacoes("Logradouro", "LOGRADOURO_OBRIGATORIO"));
 
             if (NormalizadoService.TextoVazioOuNulo(numeroCasa))
-                notificacoes.Add(new Notification("NumeroCasa", "NUMERO_CASA_OBRIGATORIO"));
+                notificacoes.Add(new Notificacoes("NumeroCasa", "NUMERO_CASA_OBRIGATORIO"));
             else
                 numeroCasa = NormalizadoService.LimparEspacos(numeroCasa);
 

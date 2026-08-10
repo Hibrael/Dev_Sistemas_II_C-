@@ -13,18 +13,18 @@ namespace AcademiaDoZe.Domain.ValueObjects
 
         public static Result<Cpf> Criar(string numero)
         {
-            var notificacoes = new List<Notification>();
+            var notificacoes = new List<Notificacoes>();
 
             if (NormalizadoService.TextoVazioOuNulo(numero))
             {
-                notificacoes.Add(new Notification("Cpf", "CPF_OBRIGATORIO"));
+                notificacoes.Add(new Notificacoes("Cpf", "CPF_OBRIGATORIO"));
                 return Result<Cpf>.Failure(notificacoes);
             }
 
             var digitos = NormalizadoService.ApenasDigitos(numero);
 
             if (!ValidarCpf(digitos))
-                notificacoes.Add(new Notification("Cpf", "CPF_INVALIDO"));
+                notificacoes.Add(new Notificacoes("Cpf", "CPF_INVALIDO"));
 
             if (notificacoes.Count != 0)
                 return Result<Cpf>.Failure(notificacoes);

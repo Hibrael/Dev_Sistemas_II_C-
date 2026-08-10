@@ -35,16 +35,16 @@ namespace AcademiaDoZe.Domain.Entities
         public static Result<Matricula> Criar(int id, int alunoId, MatriculaPlano plano,
             MatriculaRestricoes restricoes, DateOnly dataInicio, decimal valor)
         {
-            var notificacoes = new List<Notification>();
+            var notificacoes = new List<Notificacoes>();
 
             if (alunoId <= 0)
-                notificacoes.Add(new Notification("AlunoId", "ALUNO_INVALIDO"));
+                notificacoes.Add(new Notificacoes("AlunoId", "ALUNO_INVALIDO"));
 
             if (!Enum.IsDefined(plano))
-                notificacoes.Add(new Notification("Plano", "PLANO_MATRICULA_INVALIDO"));
+                notificacoes.Add(new Notificacoes("Plano", "PLANO_MATRICULA_INVALIDO"));
 
             if (valor <= 0)
-                notificacoes.Add(new Notification("Valor", "VALOR_MATRICULA_INVALIDO"));
+                notificacoes.Add(new Notificacoes("Valor", "VALOR_MATRICULA_INVALIDO"));
 
             if (notificacoes.Count != 0)
                 return Result<Matricula>.Failure(notificacoes);
