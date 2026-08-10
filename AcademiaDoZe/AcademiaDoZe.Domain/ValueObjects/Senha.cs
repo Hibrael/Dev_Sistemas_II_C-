@@ -20,12 +20,12 @@ namespace AcademiaDoZe.Domain.ValueObjects
         /// <summary>Cria uma nova senha a partir de texto puro digitado pelo usuário, validando a força mínima.</summary>
         public static Result<Senha> Criar(string senhaTextoPlano)
         {
-            var notificacoes = new List<Notification>();
+            var notificacoes = new List<Notificacoes>();
 
             if (NormalizadoService.TextoVazioOuNulo(senhaTextoPlano) || senhaTextoPlano.Length < 8)
-                notificacoes.Add(new Notification("Senha", "SENHA_TAMANHO_MINIMO"));
+                notificacoes.Add(new Notificacoes("Senha", "SENHA_TAMANHO_MINIMO"));
             else if (!ContemLetraENumero(senhaTextoPlano))
-                notificacoes.Add(new Notification("Senha", "SENHA_REQUISITOS_INVALIDOS"));
+                notificacoes.Add(new Notificacoes("Senha", "SENHA_REQUISITOS_INVALIDOS"));
 
             if (notificacoes.Count != 0)
                 return Result<Senha>.Failure(notificacoes);

@@ -16,18 +16,18 @@ namespace AcademiaDoZe.Domain.ValueObjects
 
         public static Result<Cep> Criar(string numero)
         {
-            var notificacoes = new List<Notification>();
+            var notificacoes = new List<Notificacoes>();
 
             if (NormalizadoService.TextoVazioOuNulo(numero))
             {
-                notificacoes.Add(new Notification("Cep", "CEP_OBRIGATORIO"));
+                notificacoes.Add(new Notificacoes("Cep", "CEP_OBRIGATORIO"));
                 return Result<Cep>.Failure(notificacoes);
             }
 
             var digitos = NormalizadoService.ApenasDigitos(numero);
 
             if (digitos.Length != 8)
-                notificacoes.Add(new Notification("Cep", "CEP_INVALIDO"));
+                notificacoes.Add(new Notificacoes("Cep", "CEP_INVALIDO"));
 
             if (notificacoes.Count != 0)
                 return Result<Cep>.Failure(notificacoes);

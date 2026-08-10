@@ -2,44 +2,44 @@
 namespace AcademiaDoZe.Domain.Common
 {
     /// <summary>
-    /// Encapsula o resultado da criaÁ„o/operaÁ„o de um objeto de domÌnio: ou o objeto foi
-    /// construÌdo com sucesso (Success), ou a operaÁ„o falhou e carrega a lista de
-    /// Notification que explica por quÍ (Failure).
+    /// Encapsula o resultado da cria√ß√£o/opera√ß√£o de um objeto de dom√≠nio: ou o objeto foi
+    /// constru√≠do com sucesso (Success), ou a opera√ß√£o falhou e carrega a lista de
+    /// Notificacoes que explica por qu√™ (Failure).
     ///
-    /// Este È o mecanismo que permite que os mÈtodos est·ticos "Criar" das Entities e
-    /// Value Objects nunca lancem exceÁ„o para erros de validaÁ„o de entrada ó exceÁıes
-    /// (DomainException) ficam reservadas para violaÁ„o de invariantes em operaÁıes de
-    /// domÌnio (ex.: cancelar uma matrÌcula j· cancelada), n„o para dados de entrada inv·lidos.
+    /// Este √© o mecanismo que permite que os m√©todos est√°ticos "Criar" das Entities e
+    /// Value Objects nunca lancem exce√ß√£o para erros de valida√ß√£o de entrada ‚Äî exce√ß√µes
+    /// (DomainException) ficam reservadas para viola√ß√£o de invariantes em opera√ß√µes de
+    /// dom√≠nio (ex.: cancelar uma matr√≠cula j√° cancelada), n√£o para dados de entrada inv√°lidos.
     /// </summary>
-    /// <typeparam name="T">Tipo do valor produzido quando a operaÁ„o È bem-sucedida.</typeparam>
+    /// <typeparam name="T">Tipo do valor produzido quando a opera√ß√£o √© bem-sucedida.</typeparam>
     public sealed class Result<T>
     {
         public bool IsSuccess { get; }
         public bool IsFailure => !IsSuccess;
 
         /// <summary>
-        /// Valor construÌdo com sucesso. SÛ deve ser lido quando IsSuccess È true;
-        /// nos pontos de consumo isso È expresso com o operador de perd„o de nulo (Value!),
-        /// j· que o compilador n„o consegue provar a relaÁ„o entre IsSuccess e Value.
+        /// Valor constru√≠do com sucesso. S√≥ deve ser lido quando IsSuccess √© true;
+        /// nos pontos de consumo isso √© expresso com o operador de perd√£o de nulo (Value!),
+        /// j√° que o compilador n√£o consegue provar a rela√ß√£o entre IsSuccess e Value.
         /// </summary>
         public T? Value { get; }
 
-        public IReadOnlyCollection<Notification> Notifications { get; }
+        public IReadOnlyCollection<Notificacoes> Notificacoes { get; }
 
-        private Result(bool isSuccess, T? value, IReadOnlyCollection<Notification> notifications)
+        private Result(bool isSuccess, T? value, IReadOnlyCollection<Notificacoes> notificacao)
         {
             IsSuccess = isSuccess;
             Value = value;
-            Notifications = notifications;
+            Notificacoes = notificacao ;
         }
 
         public static Result<T> Success(T value) =>
-            new(true, value, Array.Empty<Notification>());
+            new(true, value, Array.Empty<Notificacoes>());
 
-        public static Result<T> Failure(IEnumerable<Notification> notifications) =>
-            new(false, default, notifications.ToList());
+        public static Result<T> Failure(IEnumerable<Notificacoes> notificacao) =>
+            new(false, default, notificacao.ToList());
 
-        public static Result<T> Failure(Notification notification) =>
-            new(false, default, new[] { notification });
+        public static Result<T> Failure(Notificacoes notificacao) =>
+            new(false, default, new[] { notificacao });
     }
 }

@@ -13,18 +13,18 @@ namespace AcademiaDoZe.Domain.ValueObjects
 
         public static Result<Email> Criar(string endereco)
         {
-            var notificacoes = new List<Notification>();
+            var notificacoes = new List<Notificacoes>();
 
             if (NormalizadoService.TextoVazioOuNulo(endereco))
             {
-                notificacoes.Add(new Notification("Email", "EMAIL_OBRIGATORIO"));
+                notificacoes.Add(new Notificacoes("Email", "EMAIL_OBRIGATORIO"));
                 return Result<Email>.Failure(notificacoes);
             }
 
             var textoLimpo = NormalizadoService.ParaMinusculo(NormalizadoService.LimparTodosEspacos(endereco));
 
             if (!FormatoEmailRegex().IsMatch(textoLimpo))
-                notificacoes.Add(new Notification("Email", "EMAIL_INVALIDO"));
+                notificacoes.Add(new Notificacoes("Email", "EMAIL_INVALIDO"));
 
             if (notificacoes.Count != 0)
                 return Result<Email>.Failure(notificacoes);

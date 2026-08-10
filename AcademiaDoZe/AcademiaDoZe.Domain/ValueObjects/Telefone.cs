@@ -12,18 +12,18 @@ namespace AcademiaDoZe.Domain.ValueObjects
 
         public static Result<Telefone> Criar(string numero)
         {
-            var notificacoes = new List<Notification>();
+            var notificacoes = new List<Notificacoes>();
 
             if (NormalizadoService.TextoVazioOuNulo(numero))
             {
-                notificacoes.Add(new Notification("Telefone", "TELEFONE_OBRIGATORIO"));
+                notificacoes.Add(new Notificacoes("Telefone", "TELEFONE_OBRIGATORIO"));
                 return Result<Telefone>.Failure(notificacoes);
             }
 
             var digitos = NormalizadoService.ApenasDigitos(numero);
 
             if (digitos.Length != 10 && digitos.Length != 11)
-                notificacoes.Add(new Notification("Telefone", "TELEFONE_INVALIDO"));
+                notificacoes.Add(new Notificacoes("Telefone", "TELEFONE_INVALIDO"));
 
             if (notificacoes.Count != 0)
                 return Result<Telefone>.Failure(notificacoes);

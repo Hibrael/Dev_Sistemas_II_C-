@@ -32,34 +32,34 @@ namespace AcademiaDoZe.Domain.Entities
 
         public static Result<Logradouro> Criar(int id, string cep, string nome, string bairro, string cidade, string estado, string pais)
         {
-            var notificacoes = new List<Notification>();
+            var notificacoes = new List<Notificacoes>();
 
             var cepResult = Cep.Criar(cep);
             if (cepResult.IsFailure)
-                notificacoes.AddRange(cepResult.Notifications);
+                notificacoes.AddRange(cepResult.Notificacoes);
 
             if (NormalizadoService.TextoVazioOuNulo(nome))
-                notificacoes.Add(new Notification("Nome", "NOME_OBRIGATORIO"));
+                notificacoes.Add(new Notificacoes("Nome", "NOME_OBRIGATORIO"));
             else
                 nome = NormalizadoService.LimparEspacos(nome);
 
             if (NormalizadoService.TextoVazioOuNulo(bairro))
-                notificacoes.Add(new Notification("Bairro", "BAIRRO_OBRIGATORIO"));
+                notificacoes.Add(new Notificacoes("Bairro", "BAIRRO_OBRIGATORIO"));
             else
                 bairro = NormalizadoService.LimparEspacos(bairro);
 
             if (NormalizadoService.TextoVazioOuNulo(cidade))
-                notificacoes.Add(new Notification("Cidade", "CIDADE_OBRIGATORIO"));
+                notificacoes.Add(new Notificacoes("Cidade", "CIDADE_OBRIGATORIO"));
             else
                 cidade = NormalizadoService.LimparEspacos(cidade);
 
             if (NormalizadoService.TextoVazioOuNulo(estado))
-                notificacoes.Add(new Notification("Estado", "ESTADO_OBRIGATORIO"));
+                notificacoes.Add(new Notificacoes("Estado", "ESTADO_OBRIGATORIO"));
             else
                 estado = NormalizadoService.ParaMaiusculo(NormalizadoService.LimparTodosEspacos(estado));
 
             if (NormalizadoService.TextoVazioOuNulo(pais))
-                notificacoes.Add(new Notification("Pais", "PAIS_OBRIGATORIO"));
+                notificacoes.Add(new Notificacoes("Pais", "PAIS_OBRIGATORIO"));
             else
                 pais = NormalizadoService.LimparEspacos(pais);
 
