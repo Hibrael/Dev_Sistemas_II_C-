@@ -1,0 +1,10 @@
+# Normalize line endings for the repository
+# Let Git handle text files automatically and store them with LF in the repo
+* text=auto eol=lf
+
+# Explicit rules for common text files used in this repository
+*.cs text eol=lf
+*.csproj text eol=lf
+*.sln text eol=lf
+*.xaml text eol=lf
+*.md text eol=lf
