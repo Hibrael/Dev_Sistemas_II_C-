@@ -11,7 +11,7 @@ namespace AcademiaDoZe.Infrastructure.Tests
         private readonly LogradouroRepository repository;
         public LogradouroInfrastructureTests() => repository = new(ConnectionString, DatabaseType);
 
-        private async Task<Logradouro> Inserir(string nome = "Hibrael Andre Cidade Xavier", string bairro = "Cidade Xavier", string? cidade = null)
+        private async Task<Logradouro> Inserir(string nome = "Hibrael Andre", string bairro = "Cidade Xavier", string? cidade = null)
         {
             cidade ??= NomeSgbdAtual;
             var result = Logradouro.Criar(0, GerarCep(), nome, bairro, cidade, "SC", "Brasil");

@@ -8,7 +8,7 @@ namespace AcademiaDoZe.Infrastructure.Tests
     public abstract class TestBase
     {
         // Alterne o SGBD alvo dos testes trocando apenas a constante abaixo:
-        private const DatabaseType SelectedDatabaseType = DatabaseType.Sqlite;
+        private const DatabaseType SelectedDatabaseType = DatabaseType.SqlServer;
 
         protected static string NomeSgbdAtual => SelectedDatabaseType switch
         {
@@ -18,10 +18,14 @@ namespace AcademiaDoZe.Infrastructure.Tests
             _ => "Desconhecido"
         };
 
-        private static readonly string DatabasePath = Path.Combine(Path.GetTempPath(), "academia_do_ze.db");
+        private static readonly string DatabasePath = @"C:\DEV\AcademiaDoZe\db_academia_do_ze.db";
 
         static TestBase()
         {
+            var dir = Path.GetDirectoryName(DatabasePath);
+            if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
+
             if (SelectedDatabaseType == DatabaseType.Sqlite && File.Exists(DatabasePath))
                 File.Delete(DatabasePath);
         }
@@ -39,15 +43,15 @@ namespace AcademiaDoZe.Infrastructure.Tests
         private static int counter = 10000;
 
         protected static string GerarCep() =>
-            (80000000 + Interlocked.Increment(ref counter)).ToString("D8")[..8];
+            (80000000 + ((int)(DateTime.UtcNow.Ticks % 8000000)) + Interlocked.Increment(ref counter)).ToString("D8")[..8];
 
         protected static string GerarCpf() =>
-            (10000000000L + Interlocked.Increment(ref counter)).ToString("D11")[..11];
+            (10000000000L + ((DateTime.UtcNow.Ticks % 8000000000L)) + Interlocked.Increment(ref counter)).ToString("D11")[..11];
 
         protected static string GerarEmail() =>
             $"user_{Guid.NewGuid().ToString("N")[..8]}@test.com";
 
         protected static string GerarTelefone() =>
-            (49990000000L + Interlocked.Increment(ref counter)).ToString("D11")[..11];
+            (49990000000L + ((DateTime.UtcNow.Ticks % 8000000000L)) + Interlocked.Increment(ref counter)).ToString("D11")[..11];
     }
 }
