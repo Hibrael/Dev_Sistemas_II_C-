@@ -53,5 +53,8 @@ namespace AcademiaDoZe.Infrastructure.Tests
 
         protected static string GerarTelefone() =>
             (49990000000L + ((DateTime.UtcNow.Ticks % 8000000000L)) + Interlocked.Increment(ref counter)).ToString("D11")[..11];
+
+        // Requisito da atividade: a senha usada nos testes deve conter a sigla do SGBD ativo.
+        protected static string GerarSenha() => $"Senha{NomeSgbdAtual}123";
     }
 }
