@@ -93,6 +93,18 @@ namespace AcademiaDoZe.Domain.Entities
             return Result<Colaborador>.Success(colaborador);
         }
 
+        /// <summary>
+        /// Reidrata um Colaborador a partir de dados já persistidos e validados (ex.: leitura
+        /// da Infrastructure). Diferente de Criar, não reaplica as regras de negócio de entrada
+        /// (ex.: Administrador exigir CLT) nem gera um novo hash de senha — os Value Objects
+        /// recebidos (incluindo Senha, já reconstruída via Senha.Restaurar) são aceitos como
+        /// verdade, pois já vieram validados quando o registro foi originalmente criado.
+        /// </summary>
+        public static Colaborador Restaurar(int id, string nome, Cpf cpf, DateOnly dataNascimento, Telefone telefone,
+            Email email, Endereco endereco, Senha senha, Arquivo foto, DateOnly dataAdmissao, ColaboradorTipo tipo,
+            ColaboradorVinculo vinculo, decimal salario) =>
+            new(id, nome, cpf, dataNascimento, telefone, email, endereco, senha, foto, dataAdmissao, tipo, vinculo, salario);
+
         public void Desligar(DateOnly dataDemissao)
         {
             if (DataDemissao is not null)

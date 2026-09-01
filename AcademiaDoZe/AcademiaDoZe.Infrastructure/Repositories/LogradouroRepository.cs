@@ -33,11 +33,11 @@ namespace AcademiaDoZe.Infrastructure.Repositories
             catch (DbException ex) { throw new InfrastructureException("ERRO_CONSULTAR_LOGRADOUROS", ex.Message, ex); }
         }
 
-        public static Logradouro Map(DbDataReader reader)
+        public static Logradouro Map(DbDataReader reader, string nomeColumn = "nome")
         {
             try
             {
-                var result = Logradouro.Criar(reader.GetInt32Value("id_logradouro"), reader.GetStringValue("cep"), reader.GetStringValue("nome"), reader.GetStringValue("bairro"), reader.GetStringValue("cidade"), reader.GetStringValue("estado"), reader.GetStringValue("pais"));
+                var result = Logradouro.Criar(reader.GetInt32Value("id_logradouro"), reader.GetStringValue("cep"), reader.GetStringValue(nomeColumn), reader.GetStringValue("bairro"), reader.GetStringValue("cidade"), reader.GetStringValue("estado"), reader.GetStringValue("pais"));
                 if (result.IsFailure) throw new InfrastructureException("ERRO_DOMINIO_MAPEAMENTO", string.Join(", ", result.Notificacoes.Select(n => n.Mensagem)));
                 return result.Value!;
             }
