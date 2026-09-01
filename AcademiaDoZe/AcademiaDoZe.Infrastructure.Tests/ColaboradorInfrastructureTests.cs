@@ -153,7 +153,7 @@ namespace AcademiaDoZe.Infrastructure.Tests
         public async Task TrocarSenhaAtualizaOHashEPermiteVerificacao()
         {
             var item = await Inserir();
-            var novaSenhaTexto = $"Nova{NomeSgbdAtual}Senha123";
+            var novaSenhaTexto = $"Nova{SiglaSgbdAtual}Senha123";
             var novaSenha = Senha.Criar(novaSenhaTexto).Value!;
 
             Assert.True(await repository.TrocarSenha(item.Id, novaSenha));

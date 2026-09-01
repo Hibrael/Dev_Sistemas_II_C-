@@ -8,6 +8,14 @@ namespace AcademiaDoZe.Infrastructure.Tests
 {
     public class AlunoInfrastructureTests : TestBase
     {
+        [Fact]
+        public void GerarSenhaUsaSiglaDoSgbdAtual()
+        {
+            Assert.Equal($"Senha{SiglaSgbdAtual}123", GerarSenha());
+            Assert.DoesNotContain("|", GerarSenha());
+            Assert.DoesNotContain("==", GerarSenha());
+        }
+
         private readonly LogradouroRepository logradouroRepository;
         private readonly AlunoRepository repository;
 
@@ -131,7 +139,7 @@ namespace AcademiaDoZe.Infrastructure.Tests
         public async Task TrocarSenhaAtualizaOHashEPermiteVerificacao()
         {
             var item = await Inserir();
-            var novaSenhaTexto = $"Nova{NomeSgbdAtual}Senha123";
+            var novaSenhaTexto = $"Nova{SiglaSgbdAtual}Senha123";
             var novaSenha = Senha.Criar(novaSenhaTexto).Value!;
 
             Assert.True(await repository.TrocarSenha(item.Id, novaSenha));

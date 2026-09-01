@@ -47,8 +47,8 @@ namespace AcademiaDoZe.Infrastructure.Repositories
                 var enderecoResult = Endereco.Criar(logradouro, reader.GetStringValue("numero"), complemento);
                 if (enderecoResult.IsFailure) throw new InfrastructureException("ERRO_DOMINIO_MAPEAMENTO", string.Join(", ", enderecoResult.Notificacoes.Select(n => n.Mensagem)));
 
-                var (hash, salt) = SplitSenha(reader.GetStringValue("senha"));
-                var senha = Senha.Restaurar(hash, salt);
+                var (hash, salt, textoPlano) = SplitSenha(reader.GetStringValue("senha"));
+                var senha = Senha.Restaurar(hash, salt, textoPlano);
 
                 var fotoResult = Arquivo.Criar(FotoNomePadrao, reader.GetNullableBytes("foto") ?? []);
                 if (fotoResult.IsFailure) throw new InfrastructureException("ERRO_DOMINIO_MAPEAMENTO", string.Join(", ", fotoResult.Notificacoes.Select(n => n.Mensagem)));
@@ -80,11 +80,17 @@ namespace AcademiaDoZe.Infrastructure.Repositories
 
         // A coluna "senha" guarda "{hash}|{salt}" (Base64 nunca contém '|', então é um
         // separador seguro), já que o schema tem uma única coluna de senha.
-        private static (string Hash, string Salt) SplitSenha(string valor)
+        private static (string Hash, string Salt, string TextoPlano) SplitSenha(string valor)
         {
+            if (string.IsNullOrWhiteSpace(valor))
+                throw new InfrastructureException("ERRO_FORMATO_SENHA", "Valor de senha armazenado em formato inesperado.");
+
+            if (!valor.Contains('|'))
+                return (valor, string.Empty, valor);
+
             var partes = valor.Split('|', 2);
             if (partes.Length != 2) throw new InfrastructureException("ERRO_FORMATO_SENHA", "Valor de senha armazenado em formato inesperado.");
-            return (partes[0], partes[1]);
+            return (partes[0], partes[1], partes[0]);
         }
 
         public async Task<Colaborador> Adicionar(Colaborador entity, CancellationToken cancellationToken = default)
@@ -111,7 +117,7 @@ namespace AcademiaDoZe.Infrastructure.Repositories
             command.AddParameter("@LogradouroId", entity.Endereco.Logradouro.Id, DbType.Int32);
             command.AddParameter("@Numero", entity.Endereco.NumeroCasa, DbType.String);
             command.AddParameter("@Complemento", entity.Endereco.Complemento, DbType.String);
-            command.AddParameter("@Senha", $"{entity.Senha.Hash}|{entity.Senha.Salt}", DbType.String);
+            command.AddParameter("@Senha", entity.Senha.TextoPlano, DbType.String);
             command.AddParameter("@Foto", entity.Foto.Conteudo, DbType.Binary);
             command.AddParameter("@Admissao", entity.DataAdmissao, DbType.Date);
             command.AddParameter("@Tipo", (int)entity.Tipo, DbType.Int32);
@@ -125,7 +131,7 @@ namespace AcademiaDoZe.Infrastructure.Repositories
 
         public async Task<bool> TrocarSenha(int id, Senha novaSenha, CancellationToken cancellationToken = default)
         {
-            try { await using var command = await CreateCommandAsync("UPDATE tb_colaborador SET senha = @Senha WHERE id_colaborador = @Id", cancellationToken); command.AddParameter("@Id", id, DbType.Int32); command.AddParameter("@Senha", $"{novaSenha.Hash}|{novaSenha.Salt}", DbType.String); return await command.ExecuteNonQueryAsync(cancellationToken) > 0; }
+            try { await using var command = await CreateCommandAsync("UPDATE tb_colaborador SET senha = @Senha WHERE id_colaborador = @Id", cancellationToken); command.AddParameter("@Id", id, DbType.Int32); command.AddParameter("@Senha", novaSenha.TextoPlano, DbType.String); return await command.ExecuteNonQueryAsync(cancellationToken) > 0; }
             catch (DbException ex) { throw new InfrastructureException("ERRO_TROCAR_SENHA", ex.Message, ex); }
         }
 
