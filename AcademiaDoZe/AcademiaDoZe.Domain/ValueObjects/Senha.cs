@@ -10,11 +10,13 @@ namespace AcademiaDoZe.Domain.ValueObjects
     {
         public string Hash { get; }
         public string Salt { get; }
+        public string TextoPlano { get; }
 
-        private Senha(string hash, string salt)
+        private Senha(string hash, string salt, string textoPlano)
         {
             Hash = hash;
             Salt = salt;
+            TextoPlano = textoPlano;
         }
 
         /// <summary>Cria uma nova senha a partir de texto puro digitado pelo usuário, validando a força mínima.</summary>
@@ -32,21 +34,26 @@ namespace AcademiaDoZe.Domain.ValueObjects
 
             var salt = GerarSalt();
             var hash = GerarHash(senhaTextoPlano, salt);
-            return Result<Senha>.Success(new Senha(hash, salt));
+            return Result<Senha>.Success(new Senha(hash, salt, senhaTextoPlano));
         }
 
-        public static Senha Restaurar(string hash, string salt)
+        public static Senha Restaurar(string hash, string? salt = null, string? textoPlano = null)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(hash);
-            ArgumentException.ThrowIfNullOrWhiteSpace(salt);
 
-            return new Senha(hash, salt);
+            var saltReal = string.IsNullOrWhiteSpace(salt) ? string.Empty : salt;
+            var textoReal = string.IsNullOrWhiteSpace(textoPlano) ? hash : textoPlano;
+
+            return new Senha(hash, saltReal, textoReal);
         }
 
         public bool Verificar(string senhaTextoPlano)
         {
             if (NormalizadoService.TextoVazioOuNulo(senhaTextoPlano))
                 return false;
+
+            if (string.IsNullOrWhiteSpace(Salt))
+                return string.Equals(senhaTextoPlano, TextoPlano, StringComparison.Ordinal);
 
             return GerarHash(senhaTextoPlano, Salt) == Hash;
         }

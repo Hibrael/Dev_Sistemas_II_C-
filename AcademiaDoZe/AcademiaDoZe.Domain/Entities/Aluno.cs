@@ -56,6 +56,14 @@ namespace AcademiaDoZe.Domain.Entities
 
             return Result<Aluno>.Success(aluno);
         }
+
+        /// <summary>
+        /// Reidrata um Aluno a partir de dados já persistidos e validados (ex.: leitura da
+        /// Infrastructure) — ver comentário equivalente em Colaborador.Restaurar.
+        /// </summary>
+        public static Aluno Restaurar(int id, string nome, Cpf cpf, DateOnly dataNascimento, Telefone telefone,
+            Email email, Endereco endereco, Senha senha, Arquivo foto) =>
+            new(id, nome, cpf, dataNascimento, telefone, email, endereco, senha, foto);
     }
 }
 
