@@ -1,20 +1,24 @@
 // AcademiaDoZe.Domain.Tests
 using AcademiaDoZe.Domain.Entities;
 using AcademiaDoZe.Domain.Enums;
-using AcademiaDoZe.Domain.Exceptions;
+using AcademiaDoZe.Domain.ValueObjects;
 
 namespace AcademiaDoZe.Domain.Tests.Entities;
 
 public class MatriculaTests
 {
-    [Fact(DisplayName = "Matricula: criação bem-sucedida inicia ativa")]
+    private static readonly DateOnly Hoje = DateOnly.FromDateTime(DateTime.Today);
+
+    [Fact(DisplayName = "Matricula: criação bem-sucedida calcula DataFim e mantém os dados informados")]
     public void Deve_Criar_Matricula_Quando_Valida()
     {
-        var result = Matricula.Criar(1, 1, MatriculaPlano.Mensal, MatriculaRestricoes.Nenhuma,
-            DateOnly.FromDateTime(DateTime.Today), 150m);
+        var result = Matricula.Criar(1, 1, MatriculaPlano.Mensal, Hoje, "Condicionamento físico");
 
         Assert.True(result.IsSuccess);
-        Assert.True(result.Value!.Ativa);
+        Assert.Equal("Condicionamento físico", result.Value!.Objetivo);
+        Assert.Equal(MatriculaRestricoes.Nenhuma, result.Value.RestricoesMedicas);
+        Assert.Null(result.Value.LaudoMedico);
+        Assert.Null(result.Value.ObservacoesRestricoes);
     }
 
     [Theory(DisplayName = "Matricula: aluno inválido -> ALUNO_INVALIDO")]
@@ -22,8 +26,7 @@ public class MatriculaTests
     [InlineData(-1)]
     public void Deve_Falhar_Criacao_Quando_AlunoIdInvalido(int alunoId)
     {
-        var result = Matricula.Criar(1, alunoId, MatriculaPlano.Mensal, MatriculaRestricoes.Nenhuma,
-            DateOnly.FromDateTime(DateTime.Today), 150m);
+        var result = Matricula.Criar(1, alunoId, MatriculaPlano.Mensal, Hoje, "Objetivo qualquer");
 
         Assert.True(result.IsFailure);
         Assert.Contains(result.Notificacoes, n => n.Mensagem == "ALUNO_INVALIDO");
@@ -32,23 +35,22 @@ public class MatriculaTests
     [Fact(DisplayName = "Matricula: plano fora do enum -> PLANO_MATRICULA_INVALIDO")]
     public void Deve_Falhar_Criacao_Quando_PlanoInvalido()
     {
-        var result = Matricula.Criar(1, 1, (MatriculaPlano)999, MatriculaRestricoes.Nenhuma,
-            DateOnly.FromDateTime(DateTime.Today), 150m);
+        var result = Matricula.Criar(1, 1, (MatriculaPlano)999, Hoje, "Objetivo qualquer");
 
         Assert.True(result.IsFailure);
         Assert.Contains(result.Notificacoes, n => n.Mensagem == "PLANO_MATRICULA_INVALIDO");
     }
 
-    [Theory(DisplayName = "Matricula: valor inválido -> VALOR_MATRICULA_INVALIDO")]
-    [InlineData(0)]
-    [InlineData(-50)]
-    public void Deve_Falhar_Criacao_Quando_ValorInvalido(decimal valor)
+    [Theory(DisplayName = "Matricula: objetivo vazio ou nulo -> OBJETIVO_MATRICULA_INVALIDO")]
+    [InlineData("")]
+    [InlineData("   ")]
+    [InlineData(null)]
+    public void Deve_Falhar_Criacao_Quando_ObjetivoInvalido(string? objetivo)
     {
-        var result = Matricula.Criar(1, 1, MatriculaPlano.Mensal, MatriculaRestricoes.Nenhuma,
-            DateOnly.FromDateTime(DateTime.Today), valor);
+        var result = Matricula.Criar(1, 1, MatriculaPlano.Mensal, Hoje, objetivo!);
 
         Assert.True(result.IsFailure);
-        Assert.Contains(result.Notificacoes, n => n.Mensagem == "VALOR_MATRICULA_INVALIDO");
+        Assert.Contains(result.Notificacoes, n => n.Mensagem == "OBJETIVO_MATRICULA_INVALIDO");
     }
 
     [Theory(DisplayName = "Matricula: calcular DataFim por plano (mensal/trimestral/semestral/anual)")]
@@ -58,53 +60,52 @@ public class MatriculaTests
     [InlineData(MatriculaPlano.Anual, 12)]
     public void Deve_Calcular_DataFim_Corretamente(MatriculaPlano plano, int meses)
     {
-        var inicio = DateOnly.FromDateTime(DateTime.Today);
-
-        var result = Matricula.Criar(1, 1, plano, MatriculaRestricoes.Nenhuma, inicio, 150m);
+        var result = Matricula.Criar(1, 1, plano, Hoje, "Objetivo qualquer");
 
         Assert.True(result.IsSuccess);
-        Assert.Equal(inicio.AddMonths(meses), result.Value!.DataFim);
+        Assert.Equal(Hoje.AddMonths(meses), result.Value!.DataFim);
     }
 
-    [Fact(DisplayName = "Matricula: aceita combinação de restrições via Flags")]
-    public void Deve_Aceitar_Combinacao_De_Restricoes_Via_Flags()
+    [Fact(DisplayName = "Matricula: aceita combinação de restrições médicas via Flags (múltipla escolha)")]
+    public void Deve_Aceitar_Combinacao_De_RestricoesMedicas_Via_Flags()
     {
-        var restricoes = MatriculaRestricoes.Diabetes | MatriculaRestricoes.ProblemasCardiacos;
+        var restricoes = MatriculaRestricoes.Diabetes | MatriculaRestricoes.ProblemasCardiacos | MatriculaRestricoes.Labirintite;
 
-        var result = Matricula.Criar(1, 1, MatriculaPlano.Mensal, restricoes,
-            DateOnly.FromDateTime(DateTime.Today), 150m);
+        var result = Matricula.Criar(1, 1, MatriculaPlano.Mensal, Hoje, "Objetivo qualquer", restricoes);
 
         Assert.True(result.IsSuccess);
-        Assert.True(result.Value!.Restricoes.HasFlag(MatriculaRestricoes.Diabetes));
-        Assert.True(result.Value.Restricoes.HasFlag(MatriculaRestricoes.ProblemasCardiacos));
+        Assert.True(result.Value!.RestricoesMedicas.HasFlag(MatriculaRestricoes.Diabetes));
+        Assert.True(result.Value.RestricoesMedicas.HasFlag(MatriculaRestricoes.ProblemasCardiacos));
+        Assert.True(result.Value.RestricoesMedicas.HasFlag(MatriculaRestricoes.Labirintite));
+        Assert.False(result.Value.RestricoesMedicas.HasFlag(MatriculaRestricoes.CirurgiaDebilitante));
     }
 
-    [Fact(DisplayName = "Matricula: Cancelar uma matrícula ativa a torna inativa")]
-    public void Deve_Cancelar_Matricula_Com_Sucesso()
+    [Fact(DisplayName = "Matricula: restrição médica fora do enum Flags -> RESTRICAO_MEDICA_INVALIDA")]
+    public void Deve_Falhar_Criacao_Quando_RestricaoMedicaInvalida()
     {
-        var matricula = Matricula.Criar(1, 1, MatriculaPlano.Mensal, MatriculaRestricoes.Nenhuma,
-            DateOnly.FromDateTime(DateTime.Today), 150m).Value!;
+        var result = Matricula.Criar(1, 1, MatriculaPlano.Mensal, Hoje, "Objetivo qualquer", (MatriculaRestricoes)4096);
 
-        matricula.Cancelar();
-
-        Assert.False(matricula.Ativa);
+        Assert.True(result.IsFailure);
+        Assert.Contains(result.Notificacoes, n => n.Mensagem == "RESTRICAO_MEDICA_INVALIDA");
     }
 
-    [Fact(DisplayName = "Matricula: Cancelar uma matrícula já cancelada lança DomainException")]
-    public void Deve_Lancar_Excecao_Ao_Cancelar_Quando_JaCancelada()
+    [Fact(DisplayName = "Matricula: armazena laudo médico e observações da restrição quando informados")]
+    public void Deve_Armazenar_LaudoMedico_E_Observacoes_Quando_Informados()
     {
-        var matricula = Matricula.Criar(1, 1, MatriculaPlano.Mensal, MatriculaRestricoes.Nenhuma,
-            DateOnly.FromDateTime(DateTime.Today), 150m).Value!;
-        matricula.Cancelar();
+        var laudo = Arquivo.Criar("laudo.jpg", [1, 2, 3]).Value!;
 
-        Assert.Throws<DomainException>(() => matricula.Cancelar());
+        var result = Matricula.Criar(1, 1, MatriculaPlano.Mensal, Hoje, "Objetivo qualquer",
+            MatriculaRestricoes.Labirintite, laudo, "Evitar exercícios de alto impacto");
+
+        Assert.True(result.IsSuccess);
+        Assert.Same(laudo, result.Value!.LaudoMedico);
+        Assert.Equal("Evitar exercícios de alto impacto", result.Value.ObservacoesRestricoes);
     }
 
     [Fact(DisplayName = "Matricula: acumula notificações de vários campos inválidos simultaneamente")]
     public void Deve_Acumular_Multiplas_Notificacoes_Quando_VariosCamposInvalidos()
     {
-        var result = Matricula.Criar(1, 0, (MatriculaPlano)999, MatriculaRestricoes.Nenhuma,
-            DateOnly.FromDateTime(DateTime.Today), 0);
+        var result = Matricula.Criar(1, 0, (MatriculaPlano)999, Hoje, "");
 
         Assert.True(result.IsFailure);
         Assert.True(result.Notificacoes.Count >= 3);

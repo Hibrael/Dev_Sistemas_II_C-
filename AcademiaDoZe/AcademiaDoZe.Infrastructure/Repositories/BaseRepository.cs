@@ -36,6 +36,11 @@ namespace AcademiaDoZe.Infrastructure.Repositories
         protected async Task<DbCommand> CreateCommandAsync(string commandText, CancellationToken cancellationToken = default) => DbProvider.CreateCommand(commandText, await GetOpenConnectionAsync(cancellationToken));
         protected string FormatInsertQuery(string sql) => DbProvider.FormatInsertQuery(sql, _databaseType);
 
+        // Ver comentário em DbProvider.GetCurrentDateFunction/GetDateAddDaysExpression: usados
+        // pelo MatriculaRepository para montar cláusulas de data compatíveis com o SGBD ativo.
+        protected string GetCurrentDateFunction() => DbProvider.GetCurrentDateFunction(_databaseType);
+        protected string GetDateAddDaysExpression(string dateExpression, string daysParameterName) => DbProvider.GetDateAddDaysExpression(_databaseType, dateExpression, daysParameterName);
+
         public void Dispose() { if (!_disposed) { _connection?.Dispose(); _connection = null; _disposed = true; } GC.SuppressFinalize(this); }
         public async ValueTask DisposeAsync() { if (!_disposed) { if (_connection is not null) await _connection.DisposeAsync(); _connection = null; _disposed = true; } GC.SuppressFinalize(this); }
     }
