@@ -97,5 +97,25 @@ namespace AcademiaDoZe.Infrastructure.Data
                 _ => throw new InfrastructureException("SGDB_NAO_SUPORTADO", $"SGDB não suportado: {dbType}")
             };
         }
+
+        // Usadas pelo MatriculaRepository para comparar/somar datas (data_fim) sem depender de
+        // LOWER()/UPPER() nem de sintaxe específica de um único SGBD "vazada" na query. Evita-se
+        // de propósito montar a data corrente no lado do .NET e mandá-la como parâmetro: cada
+        // SGBD tem sua própria noção de "agora" e isso mantém a comparação sempre no servidor.
+        public static string GetCurrentDateFunction(DatabaseType dbType) => dbType switch
+        {
+            DatabaseType.SqlServer => "CAST(GETDATE() AS DATE)",
+            DatabaseType.MySql => "CURDATE()",
+            DatabaseType.Sqlite => "date('now')",
+            _ => throw new InfrastructureException("SGDB_NAO_SUPORTADO", $"SGDB não suportado: {dbType}")
+        };
+
+        public static string GetDateAddDaysExpression(DatabaseType dbType, string dateExpression, string daysParameterName) => dbType switch
+        {
+            DatabaseType.SqlServer => $"DATEADD(day, {daysParameterName}, {dateExpression})",
+            DatabaseType.MySql => $"DATE_ADD({dateExpression}, INTERVAL {daysParameterName} DAY)",
+            DatabaseType.Sqlite => $"date({dateExpression}, '+' || {daysParameterName} || ' days')",
+            _ => throw new InfrastructureException("SGDB_NAO_SUPORTADO", $"SGDB não suportado: {dbType}")
+        };
     }
 }
