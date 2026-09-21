@@ -2,6 +2,7 @@
 using AcademiaDoZe.Application.DTOs;
 using AcademiaDoZe.Application.Interfaces;
 using AcademiaDoZe.Application.Mappings;
+using AcademiaDoZe.Application.Security;
 using AcademiaDoZe.Domain.Common;
 using AcademiaDoZe.Domain.Repositories;
 using AcademiaDoZe.Domain.ValueObjects;
@@ -11,11 +12,12 @@ namespace AcademiaDoZe.Application.Services;
 /// <summary>
 /// Orquestra os casos de uso de Aluno.
 ///
-/// Sobre hashing de senha: o material de aula aplica Argon2id aqui, na camada de aplicação,
-/// porque no exemplo dele o Value Object Senha apenas valida a força. Neste projeto o Senha
-/// do domínio já gera salt e hash dentro de Criar, então hashear de novo aqui produziria um
-/// hash sobre outro hash e o Senha.Verificar nunca mais conferiria. Por isso o hashing fica
-/// num ponto único — o domínio — e este serviço só valida e repassa o texto digitado.
+/// Sobre hashing de senha: é aqui que a senha vira hash, com Argon2id via PasswordHasher.
+/// O Value Object Senha continua validando a força do texto digitado, mas não serve como
+/// ponto de hashing para persistência — ele calcula um SHA-256 que ninguém grava, porque os
+/// repositórios gravam Senha.TextoPlano. Sem o passo abaixo a coluna senha guardaria o texto
+/// puro. Por isso o fluxo é: validar a força do que foi digitado, trocar pelo hash, e só
+/// então montar a entidade.
 /// </summary>
 public class AlunoService : IAlunoService
 {
@@ -101,8 +103,11 @@ public class AlunoService : IAlunoService
         var aluno = await _repoFactory().ObterPorId(id, cancellationToken);
         if (aluno is null) return false;
 
-        // Senha.Criar já devolve o Value Object com salt e hash gerados.
-        return await _repoFactory().TrocarSenha(id, senhaResult.Value!, cancellationToken);
+        // Restaurar, e não Criar: o valor já é o hash final e não deve ser revalidado como
+        // se fosse uma senha digitada. É o TextoPlano do VO que o repositório grava, então
+        // envolver o hash aqui é o que faz a coluna senha receber o Argon2id.
+        var senhaHash = Senha.Restaurar(PasswordHasher.Hash(novaSenha));
+        return await _repoFactory().TrocarSenha(id, senhaHash, cancellationToken);
     }
 
     public async Task<AlunoDto> AdicionarAsync(AlunoDto alunoDto, CancellationToken cancellationToken = default)
@@ -111,7 +116,10 @@ public class AlunoService : IAlunoService
 
         var cpfVo = CriarCpf(alunoDto.Cpf, nameof(alunoDto));
         var emailVo = CriarEmail(alunoDto.Email, nameof(alunoDto));
-        ValidarSenha(alunoDto.Senha, nameof(alunoDto));
+
+        // Valida a força do texto digitado e só então o substitui pelo hash, que é o valor
+        // que ToEntity leva para a entidade e o repositório grava.
+        alunoDto.Senha = PasswordHasher.Hash(ValidarSenha(alunoDto.Senha, nameof(alunoDto)));
 
         if (await _repoFactory().CpfJaExiste(cpfVo, null, cancellationToken))
             throw new InvalidOperationException($"Já existe um aluno cadastrado com o CPF {alunoDto.Cpf}.");
@@ -133,7 +141,9 @@ public class AlunoService : IAlunoService
 
         var cpfVo = CriarCpf(alunoDto.Cpf, nameof(alunoDto));
         var emailVo = CriarEmail(alunoDto.Email, nameof(alunoDto));
-        ValidarSenha(alunoDto.Senha, nameof(alunoDto));
+
+        // Ver comentário equivalente em AdicionarAsync.
+        alunoDto.Senha = PasswordHasher.Hash(ValidarSenha(alunoDto.Senha, nameof(alunoDto)));
 
         if (await _repoFactory().CpfJaExiste(cpfVo, alunoDto.Id, cancellationToken))
             throw new InvalidOperationException($"Já existe outro aluno cadastrado com o CPF {alunoDto.Cpf}.");
@@ -178,7 +188,8 @@ public class AlunoService : IAlunoService
         return emailResult.Value!;
     }
 
-    private static void ValidarSenha(string? senha, string nomeParametro)
+    /// <summary>Valida a força da senha digitada e a devolve, pronta para ser hasheada.</summary>
+    private static string ValidarSenha(string? senha, string nomeParametro)
     {
         if (string.IsNullOrWhiteSpace(senha))
             throw new ArgumentException("Senha não pode ser vazia.", nomeParametro);
@@ -186,6 +197,8 @@ public class AlunoService : IAlunoService
         var senhaResult = Senha.Criar(senha);
         if (senhaResult.IsFailure)
             throw new ArgumentException($"Senha não atende aos requisitos mínimos: {FormatErrors(senhaResult.Notificacoes)}", nomeParametro);
+
+        return senha;
     }
 
     private static string FormatErrors(IEnumerable<Notificacoes> notificacoes) =>

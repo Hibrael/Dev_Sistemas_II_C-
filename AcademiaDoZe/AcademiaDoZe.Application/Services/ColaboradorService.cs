@@ -3,6 +3,7 @@ using AcademiaDoZe.Application.DTOs;
 using AcademiaDoZe.Application.Enums;
 using AcademiaDoZe.Application.Interfaces;
 using AcademiaDoZe.Application.Mappings;
+using AcademiaDoZe.Application.Security;
 using AcademiaDoZe.Domain.Common;
 using AcademiaDoZe.Domain.Repositories;
 using AcademiaDoZe.Domain.ValueObjects;
@@ -11,7 +12,8 @@ namespace AcademiaDoZe.Application.Services;
 
 /// <summary>
 /// Orquestra os casos de uso de Colaborador. Sobre hashing de senha, vale a mesma observação
-/// registrada em AlunoService: quem gera salt e hash é o Value Object Senha do domínio.
+/// registrada em AlunoService: é aqui que a senha vira hash Argon2id, porque o que os
+/// repositórios gravam é o TextoPlano do Value Object Senha.
 /// </summary>
 public class ColaboradorService : IColaboradorService
 {
@@ -92,7 +94,9 @@ public class ColaboradorService : IColaboradorService
         var colaborador = await _repoFactory().ObterPorId(id, cancellationToken);
         if (colaborador is null) return false;
 
-        return await _repoFactory().TrocarSenha(id, senhaResult.Value!, cancellationToken);
+        // Ver comentário equivalente em AlunoService.TrocarSenhaAsync.
+        var senhaHash = Senha.Restaurar(PasswordHasher.Hash(novaSenha));
+        return await _repoFactory().TrocarSenha(id, senhaHash, cancellationToken);
     }
 
     public async Task<ColaboradorDto> AdicionarAsync(ColaboradorDto colaboradorDto, CancellationToken cancellationToken = default)
@@ -101,7 +105,10 @@ public class ColaboradorService : IColaboradorService
 
         var cpfVo = CriarCpf(colaboradorDto.Cpf, nameof(colaboradorDto));
         var emailVo = CriarEmail(colaboradorDto.Email, nameof(colaboradorDto));
-        ValidarSenha(colaboradorDto.Senha, nameof(colaboradorDto));
+
+        // Valida a força do texto digitado e só então o substitui pelo hash, que é o valor
+        // que ToEntity leva para a entidade e o repositório grava.
+        colaboradorDto.Senha = PasswordHasher.Hash(ValidarSenha(colaboradorDto.Senha, nameof(colaboradorDto)));
 
         if (await _repoFactory().CpfJaExiste(cpfVo, null, cancellationToken))
             throw new InvalidOperationException($"Já existe um colaborador cadastrado com o CPF {colaboradorDto.Cpf}.");
@@ -123,7 +130,9 @@ public class ColaboradorService : IColaboradorService
 
         var cpfVo = CriarCpf(colaboradorDto.Cpf, nameof(colaboradorDto));
         var emailVo = CriarEmail(colaboradorDto.Email, nameof(colaboradorDto));
-        ValidarSenha(colaboradorDto.Senha, nameof(colaboradorDto));
+
+        // Ver comentário equivalente em AdicionarAsync.
+        colaboradorDto.Senha = PasswordHasher.Hash(ValidarSenha(colaboradorDto.Senha, nameof(colaboradorDto)));
 
         if (await _repoFactory().CpfJaExiste(cpfVo, colaboradorDto.Id, cancellationToken))
             throw new InvalidOperationException($"Já existe outro colaborador cadastrado com o CPF {colaboradorDto.Cpf}.");
@@ -168,7 +177,8 @@ public class ColaboradorService : IColaboradorService
         return emailResult.Value!;
     }
 
-    private static void ValidarSenha(string? senha, string nomeParametro)
+    /// <summary>Valida a força da senha digitada e a devolve, pronta para ser hasheada.</summary>
+    private static string ValidarSenha(string? senha, string nomeParametro)
     {
         if (string.IsNullOrWhiteSpace(senha))
             throw new ArgumentException("Senha não pode ser vazia.", nomeParametro);
@@ -176,6 +186,8 @@ public class ColaboradorService : IColaboradorService
         var senhaResult = Senha.Criar(senha);
         if (senhaResult.IsFailure)
             throw new ArgumentException($"Senha não atende aos requisitos mínimos: {FormatErrors(senhaResult.Notificacoes)}", nomeParametro);
+
+        return senha;
     }
 
     private static string FormatErrors(IEnumerable<Notificacoes> notificacoes) =>
