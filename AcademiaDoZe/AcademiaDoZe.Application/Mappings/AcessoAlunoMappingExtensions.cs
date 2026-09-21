@@ -79,7 +79,12 @@ namespace AcademiaDoZe.Application.Mappings
             if (alunoResult.IsFailure)
                 throw new InvalidOperationException(FormatErrors(alunoResult.Notificacoes));
 
-            return AcessoAluno.Criar(dto.Id, alunoResult.Value!);
+            // Sem DataHora o registro é um check-in novo e quem carimba o instante é o domínio;
+            // com DataHora preenchida o instante informado é preservado. Essa distinção importa
+            // no AtualizarAsync, que senão reescreveria o horário real do acesso com "agora".
+            return dto.DataHora == default
+                ? AcessoAluno.Criar(dto.Id, alunoResult.Value!)
+                : AcessoAluno.Restaurar(dto.Id, alunoResult.Value!, dto.DataHora);
         }
 
         private static string FormatErrors(IEnumerable<Notificacoes> notificacoes) =>

@@ -36,9 +36,10 @@ namespace AcademiaDoZe.Application.DTOs
         public string? FotoNomeArquivo { get; init; }
 
         /// <summary>
-        /// Preenchido na SAÍDA (ToDto). Ignorado na ENTRADA: AcessoAluno.Criar sempre
-        /// carimba DateTime.UtcNow, e a entidade não expõe um Restaurar que permitisse
-        /// reidratar o instante persistido — por isso este campo não é required.
+        /// Instante do acesso. Não é required porque tem dois papéis: deixado em branco,
+        /// marca um check-in novo e o domínio carimba a hora atual; preenchido, o instante
+        /// informado é preservado via AcessoAluno.Restaurar — o que mantém o horário real
+        /// do acesso numa atualização.
         /// </summary>
         public DateTime DataHora { get; init; }
     }

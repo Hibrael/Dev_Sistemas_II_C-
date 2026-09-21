@@ -53,11 +53,17 @@ public static class ApplicationDependencyInjection
             return (Func<IMatriculaRepository>)(() => new MatriculaRepository(config.ConnectionString, config.DatabaseType));
         });
 
-        // As fábricas de IAcessoAlunoRepository e IAcessoColaboradorRepository ainda não são
-        // registradas: a Infrastructure não possui AcessoAlunoRepository nem
-        // AcessoColaboradorRepository. Enquanto isso, resolver IAcessoAlunoService ou
-        // IAcessoColaboradorService falha no container — de propósito, para não mascarar a
-        // pendência. Os dois repositórios entram junto com a Avaliação 03.
+        services.AddTransient(provider =>
+        {
+            var config = provider.GetRequiredService<RepositoryConfig>();
+            return (Func<IAcessoAlunoRepository>)(() => new AcessoAlunoRepository(config.ConnectionString, config.DatabaseType));
+        });
+
+        services.AddTransient(provider =>
+        {
+            var config = provider.GetRequiredService<RepositoryConfig>();
+            return (Func<IAcessoColaboradorRepository>)(() => new AcessoColaboradorRepository(config.ConnectionString, config.DatabaseType));
+        });
 
         return services;
     }
