@@ -21,5 +21,20 @@ namespace AcademiaDoZe.Domain.Entities
 
             return new AcessoAluno(id, aluno, DateTime.UtcNow);
         }
+
+        /// <summary>
+        /// Reidrata um acesso a partir de dados já persistidos (ex.: leitura da Infrastructure)
+        /// — ver comentário equivalente em Aluno.Restaurar.
+        ///
+        /// Diferente de Criar, aceita a DataHora gravada em vez de carimbar DateTime.UtcNow:
+        /// sem isso um repositório não teria como devolver o instante real do check-in, já que
+        /// o construtor é privado e não há mutator para a propriedade.
+        /// </summary>
+        public static AcessoAluno Restaurar(int id, Aluno aluno, DateTime dataHora)
+        {
+            ArgumentNullException.ThrowIfNull(aluno);
+
+            return new AcessoAluno(id, aluno, dataHora);
+        }
     }
 }

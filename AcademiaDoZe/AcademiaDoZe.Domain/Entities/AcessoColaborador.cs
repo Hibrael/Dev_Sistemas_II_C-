@@ -21,5 +21,20 @@ namespace AcademiaDoZe.Domain.Entities
 
             return new AcessoColaborador(id, colaborador, DateTime.UtcNow);
         }
+
+        /// <summary>
+        /// Reidrata um acesso a partir de dados já persistidos (ex.: leitura da Infrastructure)
+        /// — ver comentário equivalente em Colaborador.Restaurar.
+        ///
+        /// Diferente de Criar, aceita a DataHora gravada em vez de carimbar DateTime.UtcNow:
+        /// sem isso um repositório não teria como devolver o instante real do check-in, já que
+        /// o construtor é privado e não há mutator para a propriedade.
+        /// </summary>
+        public static AcessoColaborador Restaurar(int id, Colaborador colaborador, DateTime dataHora)
+        {
+            ArgumentNullException.ThrowIfNull(colaborador);
+
+            return new AcessoColaborador(id, colaborador, dataHora);
+        }
     }
 }
