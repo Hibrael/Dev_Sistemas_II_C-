@@ -19,8 +19,27 @@ namespace AcademiaDoZe.Application.DTOs
         public required string Pais { get; init; }
         public required string NumeroCasa { get; init; }
         public string? Complemento { get; init; }
-        public required string Senha { get; init; }
+
+        /// <summary>
+        /// Senha em texto plano, usada apenas na ENTRADA (ToEntity), onde é obrigatória.
+        /// Nunca é preenchida na SAÍDA: ToDto devolve sempre null, para que a credencial
+        /// não escape da camada de aplicação junto com os dados cadastrais.
+        /// </summary>
+        public string? Senha { get; init; }
+
         public required byte[] Foto { get; init; }
-        public required DateTime DataHora { get; init; }
+
+        /// <summary>
+        /// Nome original do arquivo da foto, preservado para não perder a extensão no
+        /// caminho de ida e volta. Quando ausente, ToEntity assume "foto.jpg".
+        /// </summary>
+        public string? FotoNomeArquivo { get; init; }
+
+        /// <summary>
+        /// Preenchido na SAÍDA (ToDto). Ignorado na ENTRADA: AcessoAluno.Criar sempre
+        /// carimba DateTime.UtcNow, e a entidade não expõe um Restaurar que permitisse
+        /// reidratar o instante persistido — por isso este campo não é required.
+        /// </summary>
+        public DateTime DataHora { get; init; }
     }
 }

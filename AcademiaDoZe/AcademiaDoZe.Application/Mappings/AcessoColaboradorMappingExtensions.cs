@@ -9,6 +9,8 @@ namespace AcademiaDoZe.Application.Mappings
 {
     public static class AcessoColaboradorMappingExtensions
     {
+        private const string FotoNomePadrao = "foto.jpg";
+
         public static AcessoColaboradorDto ToDto(this AcessoColaborador entity)
         {
             ArgumentNullException.ThrowIfNull(entity);
@@ -35,8 +37,10 @@ namespace AcademiaDoZe.Application.Mappings
                 Pais = logradouro.Pais,
                 NumeroCasa = endereco.NumeroCasa,
                 Complemento = endereco.Complemento,
-                Senha = colaborador.Senha.TextoPlano,
+                // A senha não acompanha a saída: ver AcessoColaboradorDto.Senha.
+                Senha = null,
                 Foto = colaborador.Foto.Conteudo,
+                FotoNomeArquivo = colaborador.Foto.Nome,
                 DataAdmissao = colaborador.DataAdmissao,
                 Tipo = colaborador.Tipo.ToString(),
                 Vinculo = colaborador.Vinculo.ToString(),
@@ -49,36 +53,27 @@ namespace AcademiaDoZe.Application.Mappings
         {
             ArgumentNullException.ThrowIfNull(dto);
 
+            var senha = dto.Senha;
+            if (string.IsNullOrWhiteSpace(senha))
+                throw new InvalidOperationException("Senha: SENHA_OBRIGATORIA");
+
             var logradouroResult = Logradouro.Criar(dto.LogradouroId, dto.Cep, dto.NomeLogradouro, dto.Bairro, dto.Cidade, dto.Estado, dto.Pais);
             if (logradouroResult.IsFailure)
                 throw new InvalidOperationException(FormatErrors(logradouroResult.Notificacoes));
 
             if (!Enum.TryParse<ColaboradorTipo>(dto.Tipo, true, out var tipo))
-                throw new InvalidOperationException($"Tipo: TIPO_COLABORADOR_INVALIDO");
+                throw new InvalidOperationException($"Tipo: TIPO_COLABORADOR_INVALIDO ({dto.Tipo})");
 
             if (!Enum.TryParse<ColaboradorVinculo>(dto.Vinculo, true, out var vinculo))
-                throw new InvalidOperationException($"Vinculo: VINCULO_COLABORADOR_INVALIDO");
+                throw new InvalidOperationException($"Vinculo: VINCULO_COLABORADOR_INVALIDO ({dto.Vinculo})");
 
-            var cpfResult = Cpf.Criar(dto.Cpf);
-            if (cpfResult.IsFailure)
-                throw new InvalidOperationException(FormatErrors(cpfResult.Notificacoes));
-
-            var telefoneResult = Telefone.Criar(dto.Telefone);
-            if (telefoneResult.IsFailure)
-                throw new InvalidOperationException(FormatErrors(telefoneResult.Notificacoes));
-
-            var emailResult = Email.Criar(dto.Email);
-            if (emailResult.IsFailure)
-                throw new InvalidOperationException(FormatErrors(emailResult.Notificacoes));
-
-            var senhaResult = Senha.Criar(dto.Senha);
-            if (senhaResult.IsFailure)
-                throw new InvalidOperationException(FormatErrors(senhaResult.Notificacoes));
-
-            var fotoResult = Arquivo.Criar("foto.jpg", dto.Foto);
+            var fotoResult = Arquivo.Criar(dto.FotoNomeArquivo ?? FotoNomePadrao, dto.Foto);
             if (fotoResult.IsFailure)
                 throw new InvalidOperationException(FormatErrors(fotoResult.Notificacoes));
 
+            // Cpf, Telefone, Email e Senha não são construídos aqui de propósito: Colaborador.Criar
+            // já cria cada um desses Value Objects e agrega TODAS as notificações numa lista
+            // só. Pré-validar duplicaria a regra e ainda reportaria apenas a primeira falha.
             var colaboradorResult = Colaborador.Criar(
                 dto.ColaboradorId,
                 dto.NomeColaborador,
@@ -89,7 +84,7 @@ namespace AcademiaDoZe.Application.Mappings
                 logradouroResult.Value!,
                 dto.NumeroCasa,
                 dto.Complemento,
-                dto.Senha,
+                senha,
                 fotoResult.Value!,
                 dto.DataAdmissao,
                 tipo,
@@ -100,14 +95,6 @@ namespace AcademiaDoZe.Application.Mappings
                 throw new InvalidOperationException(FormatErrors(colaboradorResult.Notificacoes));
 
             return AcessoColaborador.Criar(dto.Id, colaboradorResult.Value!);
-        }
-
-        public static AcessoColaborador UpdateFromDto(this AcessoColaborador entity, AcessoColaboradorDto dto)
-        {
-            ArgumentNullException.ThrowIfNull(entity);
-            ArgumentNullException.ThrowIfNull(dto);
-
-            return dto.ToEntity();
         }
 
         private static string FormatErrors(IEnumerable<Notificacoes> notificacoes) =>

@@ -8,6 +8,8 @@ namespace AcademiaDoZe.Application.Mappings
 {
     public static class AcessoAlunoMappingExtensions
     {
+        private const string FotoNomePadrao = "foto.jpg";
+
         public static AcessoAlunoDto ToDto(this AcessoAluno entity)
         {
             ArgumentNullException.ThrowIfNull(entity);
@@ -34,8 +36,10 @@ namespace AcademiaDoZe.Application.Mappings
                 Pais = logradouro.Pais,
                 NumeroCasa = endereco.NumeroCasa,
                 Complemento = endereco.Complemento,
-                Senha = aluno.Senha.TextoPlano,
+                // A senha não acompanha a saída: ver AcessoAlunoDto.Senha.
+                Senha = null,
                 Foto = aluno.Foto.Conteudo,
+                FotoNomeArquivo = aluno.Foto.Nome,
                 DataHora = entity.DataHora
             };
         }
@@ -44,30 +48,21 @@ namespace AcademiaDoZe.Application.Mappings
         {
             ArgumentNullException.ThrowIfNull(dto);
 
+            var senha = dto.Senha;
+            if (string.IsNullOrWhiteSpace(senha))
+                throw new InvalidOperationException("Senha: SENHA_OBRIGATORIA");
+
             var logradouroResult = Logradouro.Criar(dto.LogradouroId, dto.Cep, dto.NomeLogradouro, dto.Bairro, dto.Cidade, dto.Estado, dto.Pais);
             if (logradouroResult.IsFailure)
                 throw new InvalidOperationException(FormatErrors(logradouroResult.Notificacoes));
 
-            var cpfResult = Cpf.Criar(dto.Cpf);
-            if (cpfResult.IsFailure)
-                throw new InvalidOperationException(FormatErrors(cpfResult.Notificacoes));
-
-            var telefoneResult = Telefone.Criar(dto.Telefone);
-            if (telefoneResult.IsFailure)
-                throw new InvalidOperationException(FormatErrors(telefoneResult.Notificacoes));
-
-            var emailResult = Email.Criar(dto.Email);
-            if (emailResult.IsFailure)
-                throw new InvalidOperationException(FormatErrors(emailResult.Notificacoes));
-
-            var senhaResult = Senha.Criar(dto.Senha);
-            if (senhaResult.IsFailure)
-                throw new InvalidOperationException(FormatErrors(senhaResult.Notificacoes));
-
-            var fotoResult = Arquivo.Criar("foto.jpg", dto.Foto);
+            var fotoResult = Arquivo.Criar(dto.FotoNomeArquivo ?? FotoNomePadrao, dto.Foto);
             if (fotoResult.IsFailure)
                 throw new InvalidOperationException(FormatErrors(fotoResult.Notificacoes));
 
+            // Cpf, Telefone, Email e Senha não são construídos aqui de propósito: Aluno.Criar
+            // já cria cada um desses Value Objects e agrega TODAS as notificações numa lista
+            // só. Pré-validar duplicaria a regra e ainda reportaria apenas a primeira falha.
             var alunoResult = Aluno.Criar(
                 dto.AlunoId,
                 dto.NomeAluno,
@@ -78,21 +73,13 @@ namespace AcademiaDoZe.Application.Mappings
                 logradouroResult.Value!,
                 dto.NumeroCasa,
                 dto.Complemento,
-                dto.Senha,
+                senha,
                 fotoResult.Value!);
 
             if (alunoResult.IsFailure)
                 throw new InvalidOperationException(FormatErrors(alunoResult.Notificacoes));
 
             return AcessoAluno.Criar(dto.Id, alunoResult.Value!);
-        }
-
-        public static AcessoAluno UpdateFromDto(this AcessoAluno entity, AcessoAlunoDto dto)
-        {
-            ArgumentNullException.ThrowIfNull(entity);
-            ArgumentNullException.ThrowIfNull(dto);
-
-            return dto.ToEntity();
         }
 
         private static string FormatErrors(IEnumerable<Notificacoes> notificacoes) =>
