@@ -17,8 +17,8 @@ namespace AcademiaDoZe.Application.Services
 
         public async Task<AcessoColaboradorDto?> ObterPorIdAsync(int id, CancellationToken cancellationToken = default)
         {
-            if (id < 0)
-                throw new ArgumentOutOfRangeException(nameof(id), "O identificador do acesso do colaborador não pode ser negativo.");
+            if (id <= 0)
+                throw new ArgumentOutOfRangeException(nameof(id), "O identificador do acesso do colaborador deve ser maior que zero.");
 
             var repository = _repoFactory();
             var entity = await repository.ObterPorId(id, cancellationToken);
@@ -54,8 +54,8 @@ namespace AcademiaDoZe.Application.Services
 
         public async Task<bool> RemoverAsync(int id, CancellationToken cancellationToken = default)
         {
-            if (id < 0)
-                throw new ArgumentOutOfRangeException(nameof(id), "O identificador do acesso do colaborador não pode ser negativo.");
+            if (id <= 0)
+                throw new ArgumentOutOfRangeException(nameof(id), "O identificador do acesso do colaborador deve ser maior que zero.");
 
             var repository = _repoFactory();
             return await repository.Remover(id, cancellationToken);
