@@ -13,8 +13,8 @@ namespace AcademiaDoZe.Application.DependencyInjection
             ArgumentNullException.ThrowIfNull(services);
             ArgumentNullException.ThrowIfNull(repositoryConfig);
 
-            services.AddTransient<Func<IAcessoAlunoRepository>>(_ => repositoryConfig.AcessoAlunoRepositoryFactory);
-            services.AddTransient<Func<IAcessoColaboradorRepository>>(_ => repositoryConfig.AcessoColaboradorRepositoryFactory);
+            services.AddSingleton<Func<IAcessoAlunoRepository>>(_ => repositoryConfig.AcessoAlunoRepositoryFactory);
+            services.AddSingleton<Func<IAcessoColaboradorRepository>>(_ => repositoryConfig.AcessoColaboradorRepositoryFactory);
 
             services.AddTransient<IAcessoAlunoService, AcessoAlunoService>();
             services.AddTransient<IAcessoColaboradorService, AcessoColaboradorService>();
