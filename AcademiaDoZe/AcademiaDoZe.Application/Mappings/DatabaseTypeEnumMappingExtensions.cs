@@ -10,7 +10,7 @@ namespace AcademiaDoZe.Application.Mappings;
 /// numéricos; a checagem com Enum.IsDefined garante que um valor fora da faixa não passe
 /// silenciosamente para a outra camada.
 /// </summary>
-public static class DatabaseTypeMappingExtensions
+public static class DatabaseTypeEnumMappingExtensions
 {
     public static DatabaseType ToInfrastructure(this AppDatabaseType tipo)
     {
@@ -20,7 +20,7 @@ public static class DatabaseTypeMappingExtensions
         return (DatabaseType)tipo;
     }
 
-    public static AppDatabaseType ToApp(this DatabaseType tipo)
+    public static AppDatabaseType ToApplication(this DatabaseType tipo)
     {
         if (!Enum.IsDefined(tipo))
             throw new InvalidOperationException($"DatabaseType: TIPO_BANCO_INVALIDO ({tipo})");
