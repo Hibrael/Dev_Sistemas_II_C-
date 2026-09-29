@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="AcademiaDoZe.Presentation.AppMaui.Views.LogradouroListPage"
+             xmlns:vm="clr-namespace:AcademiaDoZe.Presentation.AppMaui.ViewModels"
+             x:DataType="vm:LogradouroListViewModel"
+             Title="{Binding Title}">
+    <ScrollView>
+        <StackLayout Spacing="20">
+
+            <!-- Filtro de busca -->
+            <Border Style="{StaticResource CardBorder}" Margin="15,10">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                    <Picker Grid.Column="0" ItemsSource="{Binding FilterTypes}" SelectedItem="{Binding SelectedFilterType}" WidthRequest="110"/>
+                    <SearchBar Grid.Column="1" Text="{Binding SearchText}" Placeholder="Pesquisar logradouro..."/>
+                </Grid>
+            </Border>
+
+            <!-- Adicionar -->
+            <Button Text="Adicionar Logradouro" Command="{Binding AddLogradouroCommand}" Style="{StaticResource ButtonPrimary}" Margin="15,0">
+                <Button.ImageSource>
+                    <FontImageSource FontFamily="MaterialIcons" Glyph="&#xe145;" Color="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource PrimaryDarkText}}"/>
+                </Button.ImageSource>
+            </Button>
+
+            <!-- Loading Indicator -->
+            <ActivityIndicator IsVisible="{Binding IsBusy}" IsRunning="{Binding IsBusy}" VerticalOptions="Center" HorizontalOptions="Center"/>
+
+        </StackLayout>
+    </ScrollView>
+</ContentPage>

@@ -2,6 +2,9 @@
   <Project Path="AcademiaDoZe.Application/AcademiaDoZe.Application.csproj" />
   <Project Path="AcademiaDoZe.Domain.Tests/AcademiaDoZe.Domain.Tests.csproj" />
   <Project Path="AcademiaDoZe.Domain/AcademiaDoZe.Domain.csproj" Id="09ca928c-59d7-45f7-b668-083b6bf37c35" />
-  <Project Path="AcademiaDoZe.Infrastructure/AcademiaDoZe.Infrastructure.csproj" />
   <Project Path="AcademiaDoZe.Infrastructure.Tests/AcademiaDoZe.Infrastructure.Tests.csproj" />
+  <Project Path="AcademiaDoZe.Infrastructure/AcademiaDoZe.Infrastructure.csproj" />
+  <Project Path="AcademiaDoZe.Presentation.AppMaui/AcademiaDoZe.Presentation.AppMaui.csproj" Id="2e84b147-27c4-482a-8078-f01ffd6c3472">
+    <Deploy Solution="Debug|*" />
+  </Project>
 </Solution>
