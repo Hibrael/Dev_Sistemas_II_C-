@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="AcademiaDoZe.Presentation.AppMaui.Views.DashboardListPage"
              xmlns:vm="clr-namespace:AcademiaDoZe.Presentation.AppMaui.ViewModels"
+             xmlns:behaviors="clr-namespace:AcademiaDoZe.Presentation.AppMaui.Behaviors"
              x:DataType="vm:DashboardListViewModel"
              Title="{Binding Title}">
     <ScrollView>
@@ -25,6 +26,9 @@
 
                 <!-- Card Logradouros -->
                 <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource CardBorder}" Margin="15,10">
+                    <Border.Behaviors>
+                        <behaviors:CardHoverBehavior/>
+                    </Border.Behaviors>
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding NavigateToLogradourosCommand}"/>
                     </Border.GestureRecognizers>
@@ -37,6 +41,9 @@
 
                 <!-- Card Alunos -->
                 <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource CardBorder}" Margin="15,10">
+                    <Border.Behaviors>
+                        <behaviors:CardHoverBehavior/>
+                    </Border.Behaviors>
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding NavigateToAlunosCommand}"/>
                     </Border.GestureRecognizers>
@@ -49,6 +56,9 @@
 
                 <!-- Card Colaboradores -->
                 <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource CardBorder}" Margin="15,10">
+                    <Border.Behaviors>
+                        <behaviors:CardHoverBehavior/>
+                    </Border.Behaviors>
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding NavigateToColaboradoresCommand}"/>
                     </Border.GestureRecognizers>
@@ -61,6 +71,9 @@
 
                 <!-- Card Matrículas -->
                 <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource CardBorder}" Margin="15,10">
+                    <Border.Behaviors>
+                        <behaviors:CardHoverBehavior/>
+                    </Border.Behaviors>
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding NavigateToMatriculasCommand}"/>
                     </Border.GestureRecognizers>

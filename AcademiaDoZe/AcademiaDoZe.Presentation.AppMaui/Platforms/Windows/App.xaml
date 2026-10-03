@@ -5,4 +5,18 @@
     xmlns:maui="using:Microsoft.Maui"
     xmlns:local="using:AcademiaDoZe.Presentation.AppMaui.WinUI">
 
+    <!-- Substitui a cor de destaque do Windows (indicador do menu, foco dos campos etc.)
+         pela paleta azul da aplicação, independentemente da cor escolhida no sistema -->
+    <maui:MauiWinUIApplication.Resources>
+        <ResourceDictionary>
+            <Color x:Key="SystemAccentColorDark3">#172554</Color>
+            <Color x:Key="SystemAccentColorDark2">#1E3A8A</Color>
+            <Color x:Key="SystemAccentColorDark1">#1E40AF</Color>
+            <Color x:Key="SystemAccentColor">#2563EB</Color>
+            <Color x:Key="SystemAccentColorLight1">#3B82F6</Color>
+            <Color x:Key="SystemAccentColorLight2">#60A5FA</Color>
+            <Color x:Key="SystemAccentColorLight3">#93C5FD</Color>
+        </ResourceDictionary>
+    </maui:MauiWinUIApplication.Resources>
+
 </maui:MauiWinUIApplication>
