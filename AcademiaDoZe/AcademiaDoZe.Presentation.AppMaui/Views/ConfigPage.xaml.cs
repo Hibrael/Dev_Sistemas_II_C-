@@ -20,7 +20,7 @@ public partial class ConfigPage : ContentPage
         TemaPicker.SelectedIndex = Preferences.Get("Tema", "system") switch { "light" => 0, "dark" => 1, _ => 2, };
     }
 
-    private async void OnSalvarTemaClicked(object? sender, EventArgs e)
+    private async void OnAplicarTemaClicked(object? sender, EventArgs e)
     {
         string selectedTheme = TemaPicker.SelectedIndex switch { 0 => "light", 1 => "dark", _ => "system" };
         Preferences.Set("Tema", selectedTheme);
@@ -28,7 +28,7 @@ public partial class ConfigPage : ContentPage
         // Disparar mensagem para uso na recarga dinâmica
         WeakReferenceMessenger.Default.Send(new TemaPreferencesUpdatedMessage("TemaAlterado"));
 
-        await DisplayAlertAsync("Sucesso", "Dados salvos com sucesso!", "OK");
+        await DisplayAlertAsync("Sucesso", "Tema aplicado com sucesso!", "OK");
 
         // Navegar para dashboard
         await Shell.Current.GoToAsync("//dashboard");
@@ -122,7 +122,7 @@ public partial class ConfigPage : ContentPage
         }
     }
 
-    private async void OnSalvarBdClicked(object? sender, EventArgs e)
+    private async void OnAplicarBdClicked(object? sender, EventArgs e)
     {
         if (DatabaseTypePicker.SelectedItem is not string selectedTypeStr ||
             !Enum.TryParse<AppDatabaseType>(selectedTypeStr, out var selectedType))
@@ -195,18 +195,12 @@ public partial class ConfigPage : ContentPage
         // Disparar a mensagem para recarga dinâmica (processada pelo ConfigurationHelper)
         WeakReferenceMessenger.Default.Send(new BancoPreferencesUpdatedMessage("BancoAlterado"));
 
-        await DisplayAlertAsync("Sucesso", $"Configurações do banco de dados ({selectedType}) salvas com sucesso!", "OK");
+        await DisplayAlertAsync("Sucesso", $"Configurações do banco de dados ({selectedType}) aplicadas com sucesso!", "OK");
 
         // Navegar para dashboard
         await Shell.Current.GoToAsync("//dashboard");
     }
     #endregion
-
-    private async void OnCancelarClicked(object? sender, EventArgs e)
-    {
-        // retornar para dashboard
-        await Shell.Current.GoToAsync("//dashboard");
-    }
 
     // Ao fechar a página, chama WeakReferenceMessenger.Default.UnregisterAll(this); para evitar vazamentos de memória - memory leaks
     protected override void OnDisappearing()
