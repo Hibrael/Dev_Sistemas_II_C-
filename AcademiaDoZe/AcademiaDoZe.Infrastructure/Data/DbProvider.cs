@@ -24,7 +24,7 @@ namespace AcademiaDoZe.Infrastructure.Data
                 {
                     DatabaseType.SqlServer => new SqlConnection(connectionString),
                     DatabaseType.MySql => new MySqlConnection(connectionString),
-                    DatabaseType.Sqlite => new SqliteConnection(connectionString),
+                    DatabaseType.Sqlite => CreateSqliteConnection(connectionString),
                     _ => throw new InfrastructureException("SGDB_NAO_SUPORTADO", $"SGDB não suportado: {dbType}")
                 };
             }
@@ -32,6 +32,17 @@ namespace AcademiaDoZe.Infrastructure.Data
             {
                 throw new InfrastructureException("FALHA_CONEXAO", $"Falha ao instanciar conexão para {dbType}.", ex);
             }
+        }
+
+        // O LOWER() nativo do SQLite só converte letras ASCII ("SÃO" vira "sÃo"). Substituímos a função
+        // nesta conexão pela conversão do .NET, que trata acentos, para que os filtros sem diferenciar
+        // maiúsculas/minúsculas (ex.: LogradouroRepository.ObterPorCidade) funcionem com qualquer texto.
+        // SQL Server e MySQL já fazem isso corretamente no próprio LOWER().
+        private static SqliteConnection CreateSqliteConnection(string connectionString)
+        {
+            var connection = new SqliteConnection(connectionString);
+            connection.CreateFunction("lower", (string? texto) => texto?.ToLowerInvariant(), isDeterministic: true);
+            return connection;
         }
 
         public static DbCommand CreateCommand(string commandText, DbConnection connection, CommandType commandType = CommandType.Text)
