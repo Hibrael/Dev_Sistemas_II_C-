@@ -8,6 +8,9 @@ public partial class AppShell : Shell
     {
         InitializeComponent();
         RegisterRoutes();
+
+        // versão exibida no rodapé do menu lateral
+        VersaoLabel.Text = $"Academia do Zé • versão {AppInfo.Current.VersionString}";
     }
 
     // O Routing.RegisterRoute é necessário para que o Shell do MAUI reconheça e permita a navegação

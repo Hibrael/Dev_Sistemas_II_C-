@@ -26,7 +26,9 @@ namespace AcademiaDoZe.Infrastructure.Tests
             _ => "UNK"
         };
 
-        private static readonly string DatabasePath = @"C:\DEV\AcademiaDoZe\db_academia_do_ze.db";
+        // Banco SQLite exclusivo dos testes: é apagado e recriado a cada execução, por isso NÃO pode
+        // ser o mesmo arquivo usado pela aplicação (C:\DEV\AcademiaDoZe\db_academia_do_ze.db).
+        private static readonly string DatabasePath = @"C:\DEV\AcademiaDoZe\db_academia_do_ze_testes.db";
 
         static TestBase()
         {

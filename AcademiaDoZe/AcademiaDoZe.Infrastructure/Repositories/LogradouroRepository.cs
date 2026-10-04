@@ -1,6 +1,7 @@
 //Hibrael Andre Cidade Xavier
 using AcademiaDoZe.Domain.Entities;
 using AcademiaDoZe.Domain.Repositories;
+using AcademiaDoZe.Domain.Services;
 using AcademiaDoZe.Domain.ValueObjects;
 using AcademiaDoZe.Infrastructure.Data;
 using AcademiaDoZe.Infrastructure.Exceptions;
@@ -18,8 +19,10 @@ namespace AcademiaDoZe.Infrastructure.Repositories
         public async Task<Logradouro?> ObterPorCep(Cep cep, CancellationToken cancellationToken = default) => await QueryOne($"{BaseSelectQuery} WHERE cep = @Cep", c => c.AddParameter("@Cep", cep.Numero, DbType.String), cancellationToken);
 
         public async Task<IEnumerable<Logradouro>> ObterTodos(CancellationToken cancellationToken = default) => await QueryMany($"{BaseSelectQuery} ORDER BY nome", null, cancellationToken);
-        public async Task<IEnumerable<Logradouro>> ObterPorCidade(string cidade, CancellationToken cancellationToken = default) => await QueryMany($"{BaseSelectQuery} WHERE cidade = @Cidade ORDER BY bairro, nome", c => c.AddParameter("@Cidade", cidade, DbType.String), cancellationToken);
-        public async Task<IEnumerable<Logradouro>> ObterPorBairro(string cidade, string bairro, CancellationToken cancellationToken = default) => await QueryMany($"{BaseSelectQuery} WHERE cidade = @Cidade AND bairro = @Bairro ORDER BY nome", c => { c.AddParameter("@Cidade", cidade, DbType.String); c.AddParameter("@Bairro", bairro, DbType.String); }, cancellationToken);
+        // Filtros de texto sem diferenciar maiúsculas/minúsculas: a coluna passa por LOWER() (presente em
+        // SQL Server, MySQL e SQLite) e o valor buscado é normalizado para minúsculo no .NET.
+        public async Task<IEnumerable<Logradouro>> ObterPorCidade(string cidade, CancellationToken cancellationToken = default) => await QueryMany($"{BaseSelectQuery} WHERE LOWER(cidade) = @Cidade ORDER BY bairro, nome", c => c.AddParameter("@Cidade", NormalizadoService.ParaMinusculo(cidade), DbType.String), cancellationToken);
+        public async Task<IEnumerable<Logradouro>> ObterPorBairro(string cidade, string bairro, CancellationToken cancellationToken = default) => await QueryMany($"{BaseSelectQuery} WHERE LOWER(cidade) = @Cidade AND LOWER(bairro) = @Bairro ORDER BY nome", c => { c.AddParameter("@Cidade", NormalizadoService.ParaMinusculo(cidade), DbType.String); c.AddParameter("@Bairro", NormalizadoService.ParaMinusculo(bairro), DbType.String); }, cancellationToken);
 
         private async Task<Logradouro?> QueryOne(string sql, Action<DbCommand> addParameters, CancellationToken cancellationToken)
         {

@@ -15,8 +15,28 @@
     <!-- Paleta azul da Academia do Zé -->
     <Color x:Key="AzulEscuro">#1E40AF</Color>
     <Color x:Key="AzulClaro">#3B82F6</Color>
-    <Color x:Key="CardHoverLight">#DBEAFE</Color>
+    <Color x:Key="CardHoverLight">#EFF6FF</Color>
     <Color x:Key="CardHoverDark">#1E3A5F</Color>
+
+    <!-- Identidade visual: fundos azul-ardósia -->
+    <Color x:Key="FundoClaro">#F4F7FB</Color>
+    <Color x:Key="FundoEscuro">#0B1220</Color>
+    <Color x:Key="CardClaro">#FFFFFF</Color>
+    <Color x:Key="CardEscuro">#111A2E</Color>
+    <Color x:Key="BordaClaro">#E2E8F0</Color>
+    <Color x:Key="BordaEscuro">#1E2A44</Color>
+    <Color x:Key="CampoClaro">#F8FAFC</Color>
+    <Color x:Key="CampoEscuro">#0E1628</Color>
+    <Color x:Key="TextoClaro">#0F172A</Color>
+    <Color x:Key="TextoEscuro">#E2E8F0</Color>
+    <Color x:Key="TextoSecClaro">#64748B</Color>
+    <Color x:Key="TextoSecEscuro">#94A3B8</Color>
+    <Color x:Key="MenuFundo">#0B1220</Color>
+    <Color x:Key="MenuTexto">#CBD5E1</Color>
+    <Color x:Key="MenuDivisor">#1E2A44</Color>
+    <Color x:Key="HeroInicio">#1E40AF</Color>
+    <Color x:Key="HeroFim">#0A1430</Color>
+    <Color x:Key="Sucesso">#22C55E</Color>
 
     <Color x:Key="White">White</Color>
     <Color x:Key="Black">Black</Color>

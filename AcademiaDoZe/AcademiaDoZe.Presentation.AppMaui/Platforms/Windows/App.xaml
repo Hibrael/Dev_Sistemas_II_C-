@@ -16,6 +16,35 @@
             <Color x:Key="SystemAccentColorLight1">#3B82F6</Color>
             <Color x:Key="SystemAccentColorLight2">#60A5FA</Color>
             <Color x:Key="SystemAccentColorLight3">#93C5FD</Color>
+
+            <!-- Itens do menu lateral (NavigationView): seleção em pílula azul ocupando a largura toda.
+                 O menu tem fundo escuro nos dois temas, por isso os mesmos pincéis valem para claro e escuro. -->
+            <SolidColorBrush x:Key="NavigationViewItemBackgroundPointerOver" Color="#111C33"/>
+            <SolidColorBrush x:Key="NavigationViewItemBackgroundPressed" Color="#162544"/>
+            <SolidColorBrush x:Key="NavigationViewItemBackgroundSelected" Color="#1E40AF"/>
+            <SolidColorBrush x:Key="NavigationViewItemBackgroundSelectedPointerOver" Color="#1D4ED8"/>
+            <SolidColorBrush x:Key="NavigationViewItemBackgroundSelectedPressed" Color="#1E3A8A"/>
+            <SolidColorBrush x:Key="NavigationViewSelectionIndicatorForeground" Color="#93C5FD"/>
+            <SolidColorBrush x:Key="NavigationViewDefaultPaneBackground" Color="#0B1220"/>
+            <SolidColorBrush x:Key="NavigationViewExpandedPaneBackground" Color="#0B1220"/>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="NavigationViewItemBackgroundPointerOver" Color="#111C33"/>
+                    <SolidColorBrush x:Key="NavigationViewItemBackgroundPressed" Color="#162544"/>
+                    <SolidColorBrush x:Key="NavigationViewItemBackgroundSelected" Color="#1E40AF"/>
+                    <SolidColorBrush x:Key="NavigationViewItemBackgroundSelectedPointerOver" Color="#1D4ED8"/>
+                    <SolidColorBrush x:Key="NavigationViewItemBackgroundSelectedPressed" Color="#1E3A8A"/>
+                    <SolidColorBrush x:Key="NavigationViewSelectionIndicatorForeground" Color="#93C5FD"/>
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Dark">
+                    <SolidColorBrush x:Key="NavigationViewItemBackgroundPointerOver" Color="#111C33"/>
+                    <SolidColorBrush x:Key="NavigationViewItemBackgroundPressed" Color="#162544"/>
+                    <SolidColorBrush x:Key="NavigationViewItemBackgroundSelected" Color="#1E40AF"/>
+                    <SolidColorBrush x:Key="NavigationViewItemBackgroundSelectedPointerOver" Color="#1D4ED8"/>
+                    <SolidColorBrush x:Key="NavigationViewItemBackgroundSelectedPressed" Color="#1E3A8A"/>
+                    <SolidColorBrush x:Key="NavigationViewSelectionIndicatorForeground" Color="#93C5FD"/>
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
         </ResourceDictionary>
     </maui:MauiWinUIApplication.Resources>
 
