@@ -7,23 +7,56 @@
     xmlns:views="clr-namespace:AcademiaDoZe.Presentation.AppMaui.Views"
     Title="Academia do Zé">
 
+    <!-- Cabeçalho do menu lateral: logo, nome da aplicação e do autor -->
+    <Shell.FlyoutHeader>
+        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" Padding="18,22,18,18">
+            <Border Grid.Column="0" WidthRequest="52" HeightRequest="52" BackgroundColor="#0F1A33" StrokeThickness="0" StrokeShape="RoundRectangle 14" Padding="2">
+                <Image Source="academiadoze_escuro.png" Aspect="AspectFit"/>
+            </Border>
+            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                <Label Text="Academia do Zé" FontFamily="OpenSansSemibold" FontSize="16" TextColor="White"/>
+                <Label Text="Hibrael Andre Cidade Xavier" FontSize="11" TextColor="{StaticResource TextoSecEscuro}"/>
+            </VerticalStackLayout>
+            <BoxView Grid.ColumnSpan="2" HeightRequest="1" Color="{StaticResource MenuDivisor}" VerticalOptions="End" Margin="0,0,0,-18"/>
+        </Grid>
+    </Shell.FlyoutHeader>
+
+    <!-- Itens do menu: ícone + título; o destaque do item selecionado vem da seleção nativa,
+         pintada de azul em Platforms/Windows/App.xaml -->
+    <Shell.ItemTemplate>
+        <DataTemplate x:DataType="BaseShellItem">
+            <Grid ColumnDefinitions="32,*" Padding="6,0" HeightRequest="44">
+                <Image Grid.Column="0" Source="{Binding FlyoutIcon}" HeightRequest="20" WidthRequest="20" HorizontalOptions="Start" VerticalOptions="Center"/>
+                <Label Grid.Column="1" Text="{Binding Title}" FontFamily="OpenSansSemibold" FontSize="14" TextColor="{StaticResource MenuTexto}" VerticalOptions="Center"/>
+            </Grid>
+        </DataTemplate>
+    </Shell.ItemTemplate>
+
+    <!-- Rodapé do menu -->
+    <Shell.FlyoutFooter>
+        <Grid Padding="18,12,18,16">
+            <BoxView HeightRequest="1" Color="{StaticResource MenuDivisor}" VerticalOptions="Start" Margin="0,-12,0,0"/>
+            <Label x:Name="VersaoLabel" FontSize="11" TextColor="{StaticResource TextoSecClaro}"/>
+        </Grid>
+    </Shell.FlyoutFooter>
+
     <FlyoutItem Title="Dashboard">
         <FlyoutItem.Icon>
-            <FontImageSource FontFamily="MaterialIcons" Glyph="&#xe871;" Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource White}}"/>
+            <FontImageSource FontFamily="MaterialIcons" Glyph="&#xe871;" Color="{StaticResource MenuTexto}"/>
         </FlyoutItem.Icon>
         <ShellContent ContentTemplate="{DataTemplate views:DashboardListPage}" Route="dashboard"/>
     </FlyoutItem>
 
     <FlyoutItem Title="Logradouros">
         <FlyoutItem.Icon>
-            <FontImageSource FontFamily="MaterialIcons" Glyph="&#xe7f1;" Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource White}}"/>
+            <FontImageSource FontFamily="MaterialIcons" Glyph="&#xe7f1;" Color="{StaticResource MenuTexto}"/>
         </FlyoutItem.Icon>
         <ShellContent ContentTemplate="{DataTemplate views:LogradouroListPage}" Route="logradouros"/>
     </FlyoutItem>
 
     <FlyoutItem Title="Configurações">
         <FlyoutItem.Icon>
-            <FontImageSource FontFamily="MaterialIcons" Glyph="&#xe8b8;" Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource White}}"/>
+            <FontImageSource FontFamily="MaterialIcons" Glyph="&#xe8b8;" Color="{StaticResource MenuTexto}"/>
         </FlyoutItem.Icon>
         <ShellContent ContentTemplate="{DataTemplate views:ConfigPage}" Route="configuracoes"/>
     </FlyoutItem>

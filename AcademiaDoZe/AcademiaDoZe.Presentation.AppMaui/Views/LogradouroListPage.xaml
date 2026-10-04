@@ -7,27 +7,36 @@
              xmlns:dto="clr-namespace:AcademiaDoZe.Application.DTOs;assembly=AcademiaDoZe.Application"
              Title="{Binding Title}">
 
-    <Grid RowDefinitions="Auto,*">
+    <Grid RowDefinitions="Auto,Auto,*" Padding="24,18,24,12" RowSpacing="14">
 
-        <!-- Search Bar com Picker de filtro -->
-        <Border Grid.Row="0" Style="{StaticResource CardBorder}" Margin="15,10">
-            <Grid ColumnDefinitions="Auto,10,*,10,Auto,10,Auto" VerticalOptions="Center">
+        <!-- Cabeçalho: total + atualizar -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
+            <Label Grid.Column="0" Text="{Binding Logradouros.Count, StringFormat='{0} logradouro(s) na lista'}" Style="{StaticResource TextoSecundario}" VerticalOptions="Center"/>
+            <Button Grid.Column="1" Text="Atualizar" Command="{Binding RefreshCommand}" Style="{StaticResource ButtonSecondary}">
+                <Button.ImageSource>
+                    <FontImageSource FontFamily="MaterialIcons" Glyph="&#xe5d5;" Color="{AppThemeBinding Light={StaticResource TextoClaro}, Dark={StaticResource TextoEscuro}}"/>
+                </Button.ImageSource>
+            </Button>
+        </Grid>
 
-                <!-- Picker de filtro -->
-                <Picker Grid.Column="0" Title="" ItemsSource="{Binding FilterTypes}" SelectedItem="{Binding SelectedFilterType}" WidthRequest="110" HorizontalOptions="Start" HeightRequest="40" VerticalOptions="Center"/>
-
-                <!-- Entry de busca -->
-                <Entry Grid.Column="2" Text="{Binding SearchText}" Placeholder="Digite o valor..." HeightRequest="40" VerticalOptions="Center" Margin="0,0,0,0"/>
-
-                <!-- Botão de busca -->
-                <Button Grid.Column="4" Text="Buscar" Style="{StaticResource ButtonPrimary}" FontSize="14" WidthRequest="110" HeightRequest="40" Margin="0,0,0,0" Command="{Binding SearchLogradourosCommand}">
+        <!-- Busca: filtro (lista suspensa) + valor + buscar + adicionar -->
+        <Border Grid.Row="1" Style="{StaticResource CardBorder}" Padding="10">
+            <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="10" VerticalOptions="Center">
+                <Border Grid.Column="0" Style="{StaticResource CampoBorda}" Padding="6,0">
+                    <Picker Title="" ItemsSource="{Binding FilterTypes}" SelectedItem="{Binding SelectedFilterType}" WidthRequest="110" VerticalOptions="Center"/>
+                </Border>
+                <Border Grid.Column="1" Style="{StaticResource CampoBorda}" Padding="10,0">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6">
+                        <Label Grid.Column="0" Text="&#xe8b6;" Style="{StaticResource Icone}" TextColor="{AppThemeBinding Light={StaticResource TextoSecClaro}, Dark={StaticResource TextoSecEscuro}}"/>
+                        <Entry Grid.Column="1" Text="{Binding SearchText}" Placeholder="Digite o valor..." VerticalOptions="Center" ReturnCommand="{Binding SearchLogradourosCommand}"/>
+                    </Grid>
+                </Border>
+                <Button Grid.Column="2" Text="Buscar" Command="{Binding SearchLogradourosCommand}" Style="{StaticResource ButtonPrimary}">
                     <Button.ImageSource>
                         <FontImageSource FontFamily="MaterialIcons" Glyph="&#xe8b6;" Color="{StaticResource White}"/>
                     </Button.ImageSource>
                 </Button>
-
-                <!-- Botão de adicionar, ao lado da busca -->
-                <Button Grid.Column="6" Command="{Binding AddLogradouroCommand}" Style="{StaticResource ButtonPrimary}" WidthRequest="40" HeightRequest="40" CornerRadius="20" Padding="0" ToolTipProperties.Text="Adicionar">
+                <Button Grid.Column="3" Command="{Binding AddLogradouroCommand}" Style="{StaticResource ButtonPrimary}" WidthRequest="44" Padding="0" ToolTipProperties.Text="Adicionar">
                     <Button.ImageSource>
                         <FontImageSource FontFamily="MaterialIcons" Glyph="&#xe145;" Size="22" Color="{StaticResource White}"/>
                     </Button.ImageSource>
@@ -35,66 +44,86 @@
             </Grid>
         </Border>
 
-        <!-- Lista de Logradouros -->
-        <Grid Grid.Row="1">
-            <RefreshView IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}">
+        <!-- Lista de logradouros -->
+        <Border Grid.Row="2" Style="{StaticResource CardBorder}" Padding="0">
+            <Grid RowDefinitions="Auto,*">
 
-                <CollectionView ItemsSource="{Binding Logradouros}" SelectionMode="None">
+                <!-- Cabeçalho das colunas -->
+                <Grid Grid.Row="0" ColumnDefinitions="120,1.5*,*,*,130" ColumnSpacing="12" Padding="18,12">
+                    <Label Grid.Column="0" Text="CEP" Style="{StaticResource RotuloMaiusculo}" FontSize="11"/>
+                    <Label Grid.Column="1" Text="Logradouro" Style="{StaticResource RotuloMaiusculo}" FontSize="11"/>
+                    <Label Grid.Column="2" Text="Bairro" Style="{StaticResource RotuloMaiusculo}" FontSize="11"/>
+                    <Label Grid.Column="3" Text="Cidade / UF" Style="{StaticResource RotuloMaiusculo}" FontSize="11"/>
+                    <Label Grid.Column="4" Text="Ações" Style="{StaticResource RotuloMaiusculo}" FontSize="11" HorizontalTextAlignment="End"/>
+                    <BoxView Grid.ColumnSpan="5" HeightRequest="1" VerticalOptions="End" Margin="-18,0,-18,-12"
+                             Color="{AppThemeBinding Light={StaticResource BordaClaro}, Dark={StaticResource BordaEscuro}}"/>
+                </Grid>
 
-                    <CollectionView.EmptyView>
-                        <StackLayout VerticalOptions="Center">
-                            <Label Text="Nenhum logradouro encontrado" HorizontalOptions="Center" Style="{StaticResource SubHeadline}"/>
-                            <Button Text="Adicionar Primeiro Logradouro" Command="{Binding AddLogradouroCommand}" Style="{StaticResource ButtonPrimary}" HeightRequest="50" Margin="0,20,0,0">
-                                <Button.ImageSource>
-                                    <FontImageSource FontFamily="MaterialIcons" Glyph="&#xe145;" Color="{StaticResource White}"/>
-                                </Button.ImageSource>
-                            </Button>
-                        </StackLayout>
-                    </CollectionView.EmptyView>
+                <RefreshView Grid.Row="1" IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}">
+                    <CollectionView ItemsSource="{Binding Logradouros}" SelectionMode="None">
 
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="dto:LogradouroDto">
-                            <Grid Padding="1" Margin="5">
-                                <Border Style="{StaticResource CardBorder}" Margin="10">
+                        <CollectionView.EmptyView>
+                            <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="14" Padding="20">
+                                <Label Text="Nenhum logradouro encontrado" Style="{StaticResource SubHeadline}"/>
+                                <Button Text="Adicionar Primeiro Logradouro" Command="{Binding AddLogradouroCommand}" Style="{StaticResource ButtonPrimary}" HorizontalOptions="Center">
+                                    <Button.ImageSource>
+                                        <FontImageSource FontFamily="MaterialIcons" Glyph="&#xe145;" Color="{StaticResource White}"/>
+                                    </Button.ImageSource>
+                                </Button>
+                            </VerticalStackLayout>
+                        </CollectionView.EmptyView>
 
-                                    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="*,Auto,Auto">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="dto:LogradouroDto">
+                                <Grid ColumnDefinitions="120,1.5*,*,*,130" ColumnSpacing="12" Padding="18,12">
 
-                                        <Label Grid.Row="0" Grid.Column="0" Text="{Binding Cep}" FontAttributes="Bold" Margin="0,0,0,5"/>
-                                        <Label Grid.Row="1" Grid.Column="0" Text="{Binding Nome}" Margin="0,0,0,5"/>
-                                        <Label Grid.Row="2" Grid.Column="0" Text="{Binding Bairro}" Margin="0,0,0,5"/>
-                                        <Label Grid.Row="3" Grid.Column="0" Margin="0,0,0,5">
-                                            <Label.FormattedText>
-                                                <FormattedString>
-                                                    <Span Text="{Binding Cidade}"/>
-                                                    <Span Text=" - "/>
-                                                    <Span Text="{Binding Estado}"/>
-                                                </FormattedString>
-                                            </Label.FormattedText>
-                                        </Label>
-                                        <Label Grid.Row="4" Grid.Column="0" Text="{Binding Pais}" Margin="0,0,0,5"/>
+                                    <Border Grid.Column="0" Style="{StaticResource Badge}">
+                                        <Label Text="{Binding Cep}" FontFamily="OpenSansSemibold" FontSize="12" TextColor="{StaticResource AzulClaro}"/>
+                                    </Border>
 
-                                        <!-- Botões de Ação -->
-                                        <Button Grid.Row="0" Grid.Column="1" Style="{StaticResource ButtonSmall}" Margin="4,0" Clicked="OnEditButtonClicked" ToolTipProperties.Text="Editar">
+                                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="1">
+                                        <Label Text="{Binding Nome}" FontFamily="OpenSansSemibold" FontSize="14" LineBreakMode="TailTruncation"/>
+                                        <Label Text="{Binding Pais}" Style="{StaticResource TextoSecundario}" FontSize="12"/>
+                                    </VerticalStackLayout>
+
+                                    <Label Grid.Column="2" Text="{Binding Bairro}" FontSize="14" VerticalOptions="Center" LineBreakMode="TailTruncation"/>
+
+                                    <Label Grid.Column="3" FontSize="14" VerticalOptions="Center" LineBreakMode="TailTruncation">
+                                        <Label.FormattedText>
+                                            <FormattedString>
+                                                <Span Text="{Binding Cidade}"/>
+                                                <Span Text=" / "/>
+                                                <Span Text="{Binding Estado}"/>
+                                            </FormattedString>
+                                        </Label.FormattedText>
+                                    </Label>
+
+                                    <!-- Botões de Ação -->
+                                    <HorizontalStackLayout Grid.Column="4" Spacing="8" HorizontalOptions="End" VerticalOptions="Center">
+                                        <Button Style="{StaticResource ButtonSmall}" Clicked="OnEditButtonClicked" ToolTipProperties.Text="Editar">
                                             <Button.ImageSource>
                                                 <FontImageSource FontFamily="MaterialIcons" Glyph="&#xe3c9;" Color="{StaticResource White}"/>
                                             </Button.ImageSource>
                                         </Button>
-                                        <Button Grid.Row="0" Grid.Column="2" Style="{StaticResource ButtonDanger}" Margin="4,0" Clicked="OnDeleteButtonClicked" ToolTipProperties.Text="Excluir">
+                                        <Button Style="{StaticResource ButtonDanger}" Clicked="OnDeleteButtonClicked" ToolTipProperties.Text="Excluir">
                                             <Button.ImageSource>
                                                 <FontImageSource FontFamily="MaterialIcons" Glyph="&#xe872;" Color="{StaticResource White}"/>
                                             </Button.ImageSource>
                                         </Button>
-                                    </Grid>
-                                </Border>
-                            </Grid>
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
-            </RefreshView>
-        </Grid>
+                                    </HorizontalStackLayout>
+
+                                    <BoxView Grid.ColumnSpan="5" HeightRequest="1" VerticalOptions="End" Margin="-18,0,-18,-12"
+                                             Color="{AppThemeBinding Light={StaticResource BordaClaro}, Dark={StaticResource BordaEscuro}}"/>
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </RefreshView>
+            </Grid>
+        </Border>
 
         <!-- Loading Indicator -->
-        <ActivityIndicator Grid.Row="0" Grid.RowSpan="2" IsVisible="{Binding IsBusy}" IsRunning="{Binding IsBusy}" VerticalOptions="Center" HorizontalOptions="Center"/>
+        <ActivityIndicator Grid.Row="0" Grid.RowSpan="3" IsVisible="{Binding IsBusy}" IsRunning="{Binding IsBusy}" VerticalOptions="Center" HorizontalOptions="Center"/>
 
     </Grid>
 </ContentPage>
