@@ -69,6 +69,24 @@ public class LogradouroService : ILogradouroService
         return [.. logradouros.Select(l => l.ToDto())];
     }
 
+    public async Task<IEnumerable<LogradouroDto>> BuscarPorBairroAsync(string bairro, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(bairro))
+            throw new ArgumentException("Bairro não pode ser vazio.", nameof(bairro));
+
+        var logradouros = await _repoFactory().BuscarPorBairro(bairro.Trim(), cancellationToken);
+        return [.. logradouros.Select(l => l.ToDto())];
+    }
+
+    public async Task<IEnumerable<LogradouroDto>> BuscarPorNomeAsync(string nome, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(nome))
+            throw new ArgumentException("Nome não pode ser vazio.", nameof(nome));
+
+        var logradouros = await _repoFactory().BuscarPorNome(nome.Trim(), cancellationToken);
+        return [.. logradouros.Select(l => l.ToDto())];
+    }
+
     public async Task<LogradouroDto> AdicionarAsync(LogradouroDto logradouroDto, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(logradouroDto);

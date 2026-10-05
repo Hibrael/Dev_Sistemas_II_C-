@@ -34,4 +34,10 @@ public interface ILogradouroService
 
     /// <summary>Obtém todos os logradouros de um bairro específico em uma cidade.</summary>
     Task<IEnumerable<LogradouroDto>> ObterPorBairroAsync(string cidade, string bairro, CancellationToken cancellationToken = default);
+
+    /// <summary>Busca logradouros cujo bairro contém o texto informado, sem diferenciar maiúsculas/minúsculas.</summary>
+    Task<IEnumerable<LogradouroDto>> BuscarPorBairroAsync(string bairro, CancellationToken cancellationToken = default);
+
+    /// <summary>Busca logradouros cujo nome (rua) contém o texto informado, sem diferenciar maiúsculas/minúsculas.</summary>
+    Task<IEnumerable<LogradouroDto>> BuscarPorNomeAsync(string nome, CancellationToken cancellationToken = default);
 }

@@ -15,5 +15,8 @@ namespace AcademiaDoZe.Domain.Repositories
         Task<bool> CepJaExiste(Cep cep, int? id = null, CancellationToken cancellationToken = default);
         Task<IEnumerable<Logradouro>> ObterPorCidade(string cidade, CancellationToken cancellationToken = default);
         Task<IEnumerable<Logradouro>> ObterPorBairro(string cidade, string bairro, CancellationToken cancellationToken = default);
+        // buscas por trecho do texto, sem diferenciar maiúsculas/minúsculas
+        Task<IEnumerable<Logradouro>> BuscarPorBairro(string bairro, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Logradouro>> BuscarPorNome(string nome, CancellationToken cancellationToken = default);
     }
 }
