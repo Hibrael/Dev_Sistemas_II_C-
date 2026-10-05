@@ -54,7 +54,7 @@ public static class ConfigurationHelper
             if (string.IsNullOrWhiteSpace(dbPath))
                 dbPath = defaultDbPath;
 
-            var complemento = Preferences.Get("Sqlite_Complemento", Preferences.Get("Complemento", "Default Timeout=5;"));
+            var complemento = Preferences.Get("Sqlite_Complemento", "Default Timeout=5;");
             connectionString = $"Data Source={dbPath};{complemento}";
         }
         else
@@ -70,7 +70,7 @@ public static class ConfigurationHelper
             var dbDatabase = Preferences.Get($"{prefix}_Banco", Preferences.Get("Banco", "db_academia_do_ze"));
             var dbUser = Preferences.Get($"{prefix}_Usuario", Preferences.Get("Usuario", defaultUser));
             var dbPassword = Preferences.Get($"{prefix}_Senha", Preferences.Get("Senha", "abcBolinhas12345"));
-            var dbComplemento = Preferences.Get($"{prefix}_Complemento", Preferences.Get("Complemento", defaultComplemento));
+            var dbComplemento = Preferences.Get($"{prefix}_Complemento", defaultComplemento);
             connectionString = $"Server={dbServer};Database={dbDatabase};User Id={dbUser};Password={dbPassword};{dbComplemento}";
         }
         return (connectionString, databaseType);

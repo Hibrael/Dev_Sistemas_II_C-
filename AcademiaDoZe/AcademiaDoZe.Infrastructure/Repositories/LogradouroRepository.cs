@@ -24,6 +24,18 @@ namespace AcademiaDoZe.Infrastructure.Repositories
         public async Task<IEnumerable<Logradouro>> ObterPorCidade(string cidade, CancellationToken cancellationToken = default) => await QueryMany($"{BaseSelectQuery} WHERE LOWER(cidade) = @Cidade ORDER BY bairro, nome", c => c.AddParameter("@Cidade", NormalizadoService.ParaMinusculo(cidade), DbType.String), cancellationToken);
         public async Task<IEnumerable<Logradouro>> ObterPorBairro(string cidade, string bairro, CancellationToken cancellationToken = default) => await QueryMany($"{BaseSelectQuery} WHERE LOWER(cidade) = @Cidade AND LOWER(bairro) = @Bairro ORDER BY nome", c => { c.AddParameter("@Cidade", NormalizadoService.ParaMinusculo(cidade), DbType.String); c.AddParameter("@Bairro", NormalizadoService.ParaMinusculo(bairro), DbType.String); }, cancellationToken);
 
+        // Busca por trecho: LOWER(coluna) LIKE '%texto%'. O caractere '!' é usado como escape porque funciona
+        // igual nos três SGBDs (a barra invertida é tratada de forma diferente no MySQL), e assim um '%' ou '_'
+        // digitado pelo usuário é procurado literalmente em vez de virar curinga.
+        public async Task<IEnumerable<Logradouro>> BuscarPorBairro(string bairro, CancellationToken cancellationToken = default) => await QueryMany($"{BaseSelectQuery} WHERE LOWER(bairro) LIKE @Bairro ESCAPE '!' ORDER BY bairro, nome", c => c.AddParameter("@Bairro", PadraoContem(bairro), DbType.String), cancellationToken);
+        public async Task<IEnumerable<Logradouro>> BuscarPorNome(string nome, CancellationToken cancellationToken = default) => await QueryMany($"{BaseSelectQuery} WHERE LOWER(nome) LIKE @Nome ESCAPE '!' ORDER BY nome", c => c.AddParameter("@Nome", PadraoContem(nome), DbType.String), cancellationToken);
+
+        private static string PadraoContem(string texto)
+        {
+            var normalizado = NormalizadoService.ParaMinusculo(texto).Replace("!", "!!").Replace("%", "!%").Replace("_", "!_");
+            return $"%{normalizado}%";
+        }
+
         private async Task<Logradouro?> QueryOne(string sql, Action<DbCommand> addParameters, CancellationToken cancellationToken)
         {
             try { await using var command = await CreateCommandAsync(sql, cancellationToken); addParameters(command); await using var reader = await command.ExecuteReaderAsync(cancellationToken); return await reader.ReadAsync(cancellationToken) ? Map(reader) : null; }

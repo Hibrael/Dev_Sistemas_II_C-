@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="AcademiaDoZe.Presentation.AppMaui.Views.LogradouroPage"
              xmlns:vm="clr-namespace:AcademiaDoZe.Presentation.AppMaui.ViewModels"
+             xmlns:behaviors="clr-namespace:AcademiaDoZe.Presentation.AppMaui.Behaviors"
              x:DataType="vm:LogradouroViewModel"
              Title="{Binding Title}">
     <ScrollView>
@@ -40,23 +41,39 @@
                         <Entry Text="{Binding Logradouro.Bairro}" Placeholder="Digite o bairro..."/>
                     </StackLayout>
 
-                    <!-- Cidade -->
-                    <StackLayout Spacing="5">
-                        <Label Text="Cidade"/>
-                        <Entry Text="{Binding Logradouro.Cidade}" Placeholder="Digite a cidade..."/>
-                    </StackLayout>
-
-                    <!-- Estado -->
-                    <StackLayout Spacing="5">
-                        <Label Text="Estado"/>
-                        <Entry Text="{Binding Logradouro.Estado}" Placeholder="Digite o estado..."/>
-                    </StackLayout>
-
-                    <!-- País -->
+                    <!-- País → Estado → Cidade: escolhidos em listas (sem digitação livre) -->
                     <StackLayout Spacing="5">
                         <Label Text="País"/>
-                        <Entry Text="{Binding Logradouro.Pais}" Placeholder="Digite o país..."/>
+                        <Picker ItemsSource="{Binding Paises}" SelectedItem="{Binding PaisSelecionado}"/>
                     </StackLayout>
+
+                    <Grid ColumnDefinitions="140,*" ColumnSpacing="12">
+                        <!-- Estado -->
+                        <StackLayout Grid.Column="0" Spacing="5">
+                            <Label Text="Estado"/>
+                            <!-- Brasil: lista de UFs -->
+                            <Picker ItemsSource="{Binding Ufs}" SelectedItem="{Binding EstadoSelecionado}" IsVisible="{Binding IsBrasil}"/>
+                            <!-- Outros países: sigla de 2 letras, só letras -->
+                            <Entry Text="{Binding Logradouro.Estado}" Placeholder="Sigla" MaxLength="2" TextTransform="Uppercase" IsVisible="{Binding IsOutroPais}">
+                                <Entry.Behaviors>
+                                    <behaviors:ApenasLetrasBehavior/>
+                                </Entry.Behaviors>
+                            </Entry>
+                        </StackLayout>
+
+                        <!-- Cidade -->
+                        <StackLayout Grid.Column="1" Spacing="5">
+                            <Label Text="Cidade"/>
+                            <!-- Brasil: municípios da UF escolhida (IBGE) -->
+                            <Picker ItemsSource="{Binding Cidades}" SelectedItem="{Binding CidadeSelecionada}" IsVisible="{Binding IsBrasil}"/>
+                            <!-- Outros países: só letras, espaço, hífen e apóstrofo -->
+                            <Entry Text="{Binding Logradouro.Cidade}" Placeholder="Digite a cidade..." MaxLength="100" IsVisible="{Binding IsOutroPais}">
+                                <Entry.Behaviors>
+                                    <behaviors:ApenasLetrasBehavior PermitirEspacos="True"/>
+                                </Entry.Behaviors>
+                            </Entry>
+                        </StackLayout>
+                    </Grid>
                 </StackLayout>
             </Border>
 
