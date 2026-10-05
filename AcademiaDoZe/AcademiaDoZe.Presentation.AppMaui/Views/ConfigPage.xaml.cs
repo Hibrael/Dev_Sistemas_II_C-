@@ -160,7 +160,7 @@ public partial class ConfigPage : ContentPage
                     : Path.Combine(FileSystem.AppDataDirectory, "db_academia_do_ze.db");
 
                 SqliteCaminhoEntry.Text = Preferences.Get("Sqlite_Caminho", Preferences.Get("SqliteCaminho", defaultSqlitePath));
-                ComplementoEntry.Text = Preferences.Get("Sqlite_Complemento", Preferences.Get("Complemento", "Default Timeout=5;"));
+                ComplementoEntry.Text = Preferences.Get("Sqlite_Complemento", "Default Timeout=5;");
                 break;
 
             case AppDatabaseType.SqlServer:
@@ -179,7 +179,7 @@ public partial class ConfigPage : ContentPage
                 BancoEntry.Text = Preferences.Get("SqlServer_Banco", Preferences.Get("Banco", "db_academia_do_ze"));
                 UsuarioEntry.Text = Preferences.Get("SqlServer_Usuario", Preferences.Get("Usuario", "sa"));
                 SenhaEntry.Text = Preferences.Get("SqlServer_Senha", Preferences.Get("Senha", "abcBolinhas12345"));
-                ComplementoEntry.Text = Preferences.Get("SqlServer_Complemento", Preferences.Get("Complemento", "TrustServerCertificate=True;Encrypt=True;Connect Timeout=5;Connection Timeout=5;"));
+                ComplementoEntry.Text = Preferences.Get("SqlServer_Complemento", "TrustServerCertificate=True;Encrypt=True;Connect Timeout=5;Connection Timeout=5;");
                 break;
 
             case AppDatabaseType.MySql:
@@ -198,7 +198,7 @@ public partial class ConfigPage : ContentPage
                 BancoEntry.Text = Preferences.Get("MySql_Banco", Preferences.Get("Banco", "db_academia_do_ze"));
                 UsuarioEntry.Text = Preferences.Get("MySql_Usuario", Preferences.Get("Usuario", "root"));
                 SenhaEntry.Text = Preferences.Get("MySql_Senha", Preferences.Get("Senha", "abcBolinhas12345"));
-                ComplementoEntry.Text = Preferences.Get("MySql_Complemento", Preferences.Get("Complemento", "Connection Timeout=5;Default Command Timeout=30;"));
+                ComplementoEntry.Text = Preferences.Get("MySql_Complemento", "Connection Timeout=5;Default Command Timeout=30;");
                 break;
         }
     }

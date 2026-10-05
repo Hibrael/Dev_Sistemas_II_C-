@@ -9,7 +9,7 @@ public partial class LogradouroListViewModel : BaseViewModel
 {
     private readonly ILogradouroService _logradouroService;
 
-    public ObservableCollection<string> FilterTypes { get; } = ["Cidade", "Id", "Cep"];
+    public ObservableCollection<string> FilterTypes { get; } = ["Cidade", "Bairro", "Rua", "Id", "Cep"];
 
     private ObservableCollection<LogradouroDto> _logradouros = [];
     public ObservableCollection<LogradouroDto> Logradouros { get => _logradouros; set => SetProperty(ref _logradouros, value); }
@@ -24,7 +24,7 @@ public partial class LogradouroListViewModel : BaseViewModel
         set => SetProperty(ref _searchText, value);
     }
 
-    private string _selectedFilterType = "Cidade"; // Cidade, Id, Cep
+    private string _selectedFilterType = "Cidade"; // Cidade, Bairro, Rua, Id, Cep
     public string SelectedFilterType
     {
         get => _selectedFilterType;
@@ -103,6 +103,16 @@ public partial class LogradouroListViewModel : BaseViewModel
             else if (SelectedFilterType == "Cidade")
             {
                 resultados = await _logradouroService.ObterPorCidadeAsync(SearchText.Trim(), cts.Token) ?? [];
+            }
+            else if (SelectedFilterType == "Bairro")
+            {
+                // busca por trecho do nome do bairro, sem diferenciar maiúsculas/minúsculas
+                resultados = await _logradouroService.BuscarPorBairroAsync(SearchText.Trim(), cts.Token) ?? [];
+            }
+            else if (SelectedFilterType == "Rua")
+            {
+                // busca por trecho do nome da rua (logradouro), sem diferenciar maiúsculas/minúsculas
+                resultados = await _logradouroService.BuscarPorNomeAsync(SearchText.Trim(), cts.Token) ?? [];
             }
             else if (SelectedFilterType == "Id")
             {

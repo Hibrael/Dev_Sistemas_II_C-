@@ -1,3 +1,4 @@
+using AcademiaDoZe.Presentation.AppMaui.Services;
 using AcademiaDoZe.Presentation.AppMaui.Configuration;
 using AcademiaDoZe.Presentation.AppMaui.ViewModels;
 using AcademiaDoZe.Presentation.AppMaui.Views;
@@ -23,6 +24,9 @@ public static class MauiProgram
 
         // Configurar serviços da aplicação e repositórios
         ConfigurationHelper.ConfigureServices(builder.Services);
+
+        // Listas de país, UF e municípios (lidas uma única vez do arquivo embutido)
+        builder.Services.AddSingleton<LocalidadesService>();
 
         // Registrar ViewModels
         builder.Services.AddTransient<DashboardListViewModel>();
