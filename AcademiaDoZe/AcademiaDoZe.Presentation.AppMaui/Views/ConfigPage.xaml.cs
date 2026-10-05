@@ -175,10 +175,10 @@ public partial class ConfigPage : ContentPage
                 ComplementoLabel.Text = "Complemento (SSL / Timeout / Criptografia)";
                 ComplementoEntry.Placeholder = "TrustServerCertificate=True;Encrypt=True;Connect Timeout=5;Connection Timeout=5;";
 
-                ServidorEntry.Text = Preferences.Get("SqlServer_Servidor", Preferences.Get("Servidor", "172.24.32.1"));
-                BancoEntry.Text = Preferences.Get("SqlServer_Banco", Preferences.Get("Banco", "db_academia_do_ze"));
-                UsuarioEntry.Text = Preferences.Get("SqlServer_Usuario", Preferences.Get("Usuario", "sa"));
-                SenhaEntry.Text = Preferences.Get("SqlServer_Senha", Preferences.Get("Senha", "abcBolinhas12345"));
+                ServidorEntry.Text = Preferences.Get("SqlServer_Servidor", "172.24.32.1");
+                BancoEntry.Text = Preferences.Get("SqlServer_Banco", "db_academia_do_ze");
+                UsuarioEntry.Text = Preferences.Get("SqlServer_Usuario", "sa");
+                SenhaEntry.Text = Preferences.Get("SqlServer_Senha", "abcBolinhas12345");
                 ComplementoEntry.Text = Preferences.Get("SqlServer_Complemento", "TrustServerCertificate=True;Encrypt=True;Connect Timeout=5;Connection Timeout=5;");
                 break;
 
@@ -194,10 +194,10 @@ public partial class ConfigPage : ContentPage
                 ComplementoLabel.Text = "Complemento (Porta / Timeout)";
                 ComplementoEntry.Placeholder = "Connection Timeout=5;Default Command Timeout=30;";
 
-                ServidorEntry.Text = Preferences.Get("MySql_Servidor", Preferences.Get("Servidor", "10.30.21.16"));
-                BancoEntry.Text = Preferences.Get("MySql_Banco", Preferences.Get("Banco", "db_academia_do_ze"));
-                UsuarioEntry.Text = Preferences.Get("MySql_Usuario", Preferences.Get("Usuario", "root"));
-                SenhaEntry.Text = Preferences.Get("MySql_Senha", Preferences.Get("Senha", "abcBolinhas12345"));
+                ServidorEntry.Text = Preferences.Get("MySql_Servidor", "10.30.21.16");
+                BancoEntry.Text = Preferences.Get("MySql_Banco", "db_academia_do_ze");
+                UsuarioEntry.Text = Preferences.Get("MySql_Usuario", "root");
+                SenhaEntry.Text = Preferences.Get("MySql_Senha", "abcBolinhas12345");
                 ComplementoEntry.Text = Preferences.Get("MySql_Complemento", "Connection Timeout=5;Default Command Timeout=30;");
                 break;
         }
@@ -225,9 +225,8 @@ public partial class ConfigPage : ContentPage
             Preferences.Set("Sqlite_Caminho", caminho);
             Preferences.Set("Sqlite_Complemento", complemento);
 
-            // Chaves de compatibilidade
+            // Chave de compatibilidade (lida como reserva em ConfigurationHelper)
             Preferences.Set("SqliteCaminho", caminho);
-            Preferences.Set("Complemento", complemento);
         }
         else
         {
@@ -261,13 +260,6 @@ public partial class ConfigPage : ContentPage
             Preferences.Set($"{prefix}_Usuario", usuario);
             Preferences.Set($"{prefix}_Senha", senha);
             Preferences.Set($"{prefix}_Complemento", complemento);
-
-            // Chaves de compatibilidade
-            Preferences.Set("Servidor", servidor);
-            Preferences.Set("Banco", banco);
-            Preferences.Set("Usuario", usuario);
-            Preferences.Set("Senha", senha);
-            Preferences.Set("Complemento", complemento);
         }
 
         Preferences.Set("DatabaseType", selectedType.ToString());

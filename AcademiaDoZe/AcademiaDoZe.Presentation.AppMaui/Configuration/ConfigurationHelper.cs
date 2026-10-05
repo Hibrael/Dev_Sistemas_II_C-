@@ -66,10 +66,10 @@ public static class ConfigurationHelper
                 ? "TrustServerCertificate=True;Encrypt=True;Connect Timeout=5;Connection Timeout=5;"
                 : "Connection Timeout=5;Default Command Timeout=30;";
 
-            var dbServer = Preferences.Get($"{prefix}_Servidor", Preferences.Get("Servidor", defaultServer));
-            var dbDatabase = Preferences.Get($"{prefix}_Banco", Preferences.Get("Banco", "db_academia_do_ze"));
-            var dbUser = Preferences.Get($"{prefix}_Usuario", Preferences.Get("Usuario", defaultUser));
-            var dbPassword = Preferences.Get($"{prefix}_Senha", Preferences.Get("Senha", "abcBolinhas12345"));
+            var dbServer = Preferences.Get($"{prefix}_Servidor", defaultServer);
+            var dbDatabase = Preferences.Get($"{prefix}_Banco", "db_academia_do_ze");
+            var dbUser = Preferences.Get($"{prefix}_Usuario", defaultUser);
+            var dbPassword = Preferences.Get($"{prefix}_Senha", "abcBolinhas12345");
             var dbComplemento = Preferences.Get($"{prefix}_Complemento", defaultComplemento);
             connectionString = $"Server={dbServer};Database={dbDatabase};User Id={dbUser};Password={dbPassword};{dbComplemento}";
         }
