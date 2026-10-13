@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Hibrael Andre Cidade Xavier -->
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="AcademiaDoZe.Presentation.AppMaui.Views.AlunoListPage"
+             xmlns:vm="clr-namespace:AcademiaDoZe.Presentation.AppMaui.ViewModels"
+             x:DataType="vm:AlunoListViewModel"
+             xmlns:dto="clr-namespace:AcademiaDoZe.Application.DTOs;assembly=AcademiaDoZe.Application"
+             xmlns:converters="clr-namespace:AcademiaDoZe.Presentation.AppMaui.Converters"
+             Title="{Binding Title}">
+
+    <!-- Recursos locais da página: converters e o template de um aluno, usado pelo CollectionView.
+         O template usa FotoToImageSourceConverter (byte[] -> ImageSource) e Mascara (CPF, telefone e CEP).
+         OnIdiom ajusta o tamanho da foto conforme o dispositivo: Phone, Tablet, Desktop, TV e Default. -->
+    <ContentPage.Resources>
+        <converters:FotoToImageSourceConverter x:Key="FotoToImageSourceConverter"/>
+        <converters:MascaraConverter x:Key="Mascara"/>
+
+        <DataTemplate x:Key="AlunoItemTemplate" x:DataType="dto:AlunoDto">
+            <Border Style="{StaticResource CardBorder}" Padding="16">
+                <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14" RowSpacing="12">
+
+                    <!-- Foto (ícone de pessoa aparece por trás enquanto não há imagem) -->
+                    <Border Grid.Row="0" Grid.Column="0" StrokeThickness="0" StrokeShape="RoundRectangle 18" Padding="0"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource CampoClaro}, Dark={StaticResource CampoEscuro}}">
+                        <Border.WidthRequest>
+                            <OnIdiom x:TypeArguments="x:Double">
+                                <OnIdiom.Phone>64</OnIdiom.Phone>
+                                <OnIdiom.Tablet>76</OnIdiom.Tablet>
+                                <OnIdiom.Desktop>76</OnIdiom.Desktop>
+                                <OnIdiom.TV>100</OnIdiom.TV>
+                                <OnIdiom.Default>64</OnIdiom.Default>
+                            </OnIdiom>
+                        </Border.WidthRequest>
+                        <Border.HeightRequest>
+                            <OnIdiom x:TypeArguments="x:Double">
+                                <OnIdiom.Phone>64</OnIdiom.Phone>
+                                <OnIdiom.Tablet>76</OnIdiom.Tablet>
+                                <OnIdiom.Desktop>76</OnIdiom.Desktop>
+                                <OnIdiom.TV>100</OnIdiom.TV>
+                                <OnIdiom.Default>64</OnIdiom.Default>
+                            </OnIdiom>
+                        </Border.HeightRequest>
+                        <Grid>
+                            <Label Text="&#xe7fd;" Style="{StaticResource Icone}" FontSize="30" HorizontalOptions="Center" VerticalOptions="Center"/>
+                            <Image Source="{Binding Foto, Converter={StaticResource FotoToImageSourceConverter}}" Aspect="AspectFill"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Nome e selo com o ID -->
+                    <VerticalStackLayout Grid.Row="0" Grid.Column="1" VerticalOptions="Center" Spacing="6">
+                        <Label Text="{Binding Nome}" Style="{StaticResource TituloCard}" LineBreakMode="TailTruncation"/>
+                        <Border Style="{StaticResource Badge}">
+                            <Label Text="{Binding Id, StringFormat='ID #{0}'}" FontFamily="OpenSansSemibold" FontSize="11" TextColor="{StaticResource AzulClaro}"/>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Botões de Ação -->
+                    <VerticalStackLayout Grid.Row="0" Grid.Column="2" Spacing="8" VerticalOptions="Start">
+                        <Button Style="{StaticResource ButtonSmall}" Clicked="OnEditButtonClicked" ToolTipProperties.Text="Editar">
+                            <Button.ImageSource>
+                                <FontImageSource FontFamily="MaterialIcons" Glyph="&#xe3c9;" Color="{StaticResource White}"/>
+                            </Button.ImageSource>
+                        </Button>
+                        <Button Style="{StaticResource ButtonDanger}" Clicked="OnDeleteButtonClicked" ToolTipProperties.Text="Excluir">
+                            <Button.ImageSource>
+                                <FontImageSource FontFamily="MaterialIcons" Glyph="&#xe872;" Color="{StaticResource White}"/>
+                            </Button.ImageSource>
+                        </Button>
+                    </VerticalStackLayout>
+
+                    <BoxView Grid.Row="1" Grid.ColumnSpan="3" HeightRequest="1"
+                             Color="{AppThemeBinding Light={StaticResource BordaClaro}, Dark={StaticResource BordaEscuro}}"/>
+
+                    <!-- Dados: ícone + valor -->
+                    <Grid Grid.Row="2" Grid.ColumnSpan="3" ColumnDefinitions="22,*" ColumnSpacing="8" RowSpacing="6"
+                          RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto">
+
+                        <Label Grid.Row="0" Text="&#xe90d;" Style="{StaticResource Icone}" FontSize="16"/>
+                        <Label Grid.Row="0" Grid.Column="1" Text="{Binding Cpf, Converter={StaticResource Mascara}, ConverterParameter=Cpf, StringFormat='CPF {0}'}" FontSize="13"/>
+
+                        <Label Grid.Row="1" Text="&#xe0cd;" Style="{StaticResource Icone}" FontSize="16"/>
+                        <Label Grid.Row="1" Grid.Column="1" Text="{Binding Telefone, Converter={StaticResource Mascara}, ConverterParameter=Telefone}" FontSize="13"/>
+
+                        <Label Grid.Row="2" Text="&#xe0be;" Style="{StaticResource Icone}" FontSize="16"/>
+                        <Label Grid.Row="2" Grid.Column="1" Text="{Binding Email}" FontSize="13" LineBreakMode="TailTruncation"/>
+
+                        <Label Grid.Row="3" Text="&#xe7e9;" Style="{StaticResource Icone}" FontSize="16"/>
+                        <Label Grid.Row="3" Grid.Column="1" Text="{Binding DataNascimento, StringFormat='Nascimento {0:dd/MM/yyyy}'}" FontSize="13"/>
+
+                        <Label Grid.Row="4" Text="&#xe0c8;" Style="{StaticResource Icone}" FontSize="16" VerticalOptions="Start"/>
+                        <Label Grid.Row="4" Grid.Column="1" FontSize="13" LineBreakMode="WordWrap">
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <Span Text="{Binding Endereco.Nome}"/>
+                                    <Span Text=", "/>
+                                    <Span Text="{Binding Numero}"/>
+                                    <Span Text=" · "/>
+                                    <Span Text="{Binding Endereco.Bairro}"/>
+                                    <Span Text=", "/>
+                                    <Span Text="{Binding Endereco.Cidade}"/>
+                                    <Span Text="/"/>
+                                    <Span Text="{Binding Endereco.Estado}"/>
+                                    <Span Text=" · CEP "/>
+                                    <Span Text="{Binding Endereco.Cep, Converter={StaticResource Mascara}, ConverterParameter=Cep}"/>
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
+
+                        <Label Grid.Row="5" Grid.Column="1" Text="{Binding Complemento, StringFormat='Complemento: {0}'}" Style="{StaticResource TextoSecundario}" FontSize="12">
+                            <Label.Triggers>
+                                <DataTrigger TargetType="Label" Binding="{Binding Complemento}" Value="{x:Null}">
+                                    <Setter Property="IsVisible" Value="False"/>
+                                </DataTrigger>
+                                <DataTrigger TargetType="Label" Binding="{Binding Complemento}" Value="">
+                                    <Setter Property="IsVisible" Value="False"/>
+                                </DataTrigger>
+                            </Label.Triggers>
+                        </Label>
+                    </Grid>
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </ContentPage.Resources>
+
+    <!-- estrutura principal da página -->
+    <Grid RowDefinitions="Auto,Auto,*" Padding="24,18,24,12" RowSpacing="14">
+
+        <!-- Cabeçalho: total + atualizar -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
+            <Label Grid.Column="0" Text="{Binding Alunos.Count, StringFormat='{0} aluno(s) na lista'}" Style="{StaticResource TextoSecundario}" VerticalOptions="Center"/>
+            <Button Grid.Column="1" Text="Atualizar" Command="{Binding RefreshCommand}" Style="{StaticResource ButtonSecondary}">
+                <Button.ImageSource>
+                    <FontImageSource FontFamily="MaterialIcons" Glyph="&#xe5d5;" Color="{AppThemeBinding Light={StaticResource TextoClaro}, Dark={StaticResource TextoEscuro}}"/>
+                </Button.ImageSource>
+            </Button>
+        </Grid>
+
+        <!-- Busca: filtro (lista suspensa) + valor + buscar -->
+        <Border Grid.Row="1" Style="{StaticResource CardBorder}" Padding="10">
+            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" VerticalOptions="Center">
+                <Border Grid.Column="0" Style="{StaticResource CampoBorda}" Padding="6,0">
+                    <Picker Title="" ItemsSource="{Binding FilterTypes}" SelectedItem="{Binding SelectedFilterType}" WidthRequest="110" VerticalOptions="Center"/>
+                </Border>
+                <Border Grid.Column="1" Style="{StaticResource CampoBorda}" Padding="10,0">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6">
+                        <Label Grid.Column="0" Text="&#xe8b6;" Style="{StaticResource Icone}" TextColor="{AppThemeBinding Light={StaticResource TextoSecClaro}, Dark={StaticResource TextoSecEscuro}}"/>
+                        <Entry Grid.Column="1" Text="{Binding SearchText}" Placeholder="Digite o valor..." VerticalOptions="Center" ClearButtonVisibility="WhileEditing" ReturnCommand="{Binding SearchAlunosCommand}"/>
+                    </Grid>
+                </Border>
+                <Button Grid.Column="2" Text="Buscar" Command="{Binding SearchAlunosCommand}" Style="{StaticResource ButtonPrimary}">
+                    <Button.ImageSource>
+                        <FontImageSource FontFamily="MaterialIcons" Glyph="&#xe8b6;" Color="{StaticResource White}"/>
+                    </Button.ImageSource>
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- lista/grade + FAB -->
+        <Grid Grid.Row="2">
+            <RefreshView IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}">
+                <CollectionView ItemsSource="{Binding Alunos}" SelectionMode="None" ItemTemplate="{StaticResource AlunoItemTemplate}">
+
+                    <!-- Span conforme OnIdiom: lista no celular, grade nos demais -->
+                    <CollectionView.ItemsLayout>
+                        <GridItemsLayout Orientation="Vertical" HorizontalItemSpacing="14" VerticalItemSpacing="14">
+                            <GridItemsLayout.Span>
+                                <OnIdiom x:TypeArguments="x:Int32">
+                                    <OnIdiom.Phone>1</OnIdiom.Phone>
+                                    <OnIdiom.Tablet>2</OnIdiom.Tablet>
+                                    <OnIdiom.Desktop>3</OnIdiom.Desktop>
+                                    <OnIdiom.TV>4</OnIdiom.TV>
+                                    <OnIdiom.Default>1</OnIdiom.Default>
+                                </OnIdiom>
+                            </GridItemsLayout.Span>
+                        </GridItemsLayout>
+                    </CollectionView.ItemsLayout>
+
+                    <CollectionView.EmptyView>
+                        <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="14" Padding="20">
+                            <Label Text="&#xe80c;" Style="{StaticResource Icone}" FontSize="56" HorizontalOptions="Center" Opacity="0.5"/>
+                            <Label Text="Nenhum aluno encontrado" Style="{StaticResource SubHeadline}" FontSize="20"/>
+                            <Button Text="Adicionar Primeiro Aluno" Command="{Binding AddAlunoCommand}" Style="{StaticResource ButtonPrimary}" HorizontalOptions="Center">
+                                <Button.ImageSource>
+                                    <FontImageSource FontFamily="MaterialIcons" Glyph="&#xe145;" Color="{StaticResource White}"/>
+                                </Button.ImageSource>
+                            </Button>
+                        </VerticalStackLayout>
+                    </CollectionView.EmptyView>
+                </CollectionView>
+            </RefreshView>
+
+            <!-- FAB: novo aluno -->
+            <Button Command="{Binding AddAlunoCommand}" Style="{StaticResource ButtonPrimary}" CornerRadius="28" WidthRequest="56" HeightRequest="56" Padding="0"
+                    HorizontalOptions="End" VerticalOptions="End" Margin="0,0,8,8" ToolTipProperties.Text="Novo aluno">
+                <Button.Shadow>
+                    <Shadow Brush="{StaticResource AzulEscuro}" Offset="0,6" Radius="14" Opacity="0.45"/>
+                </Button.Shadow>
+                <Button.ImageSource>
+                    <FontImageSource FontFamily="MaterialIcons" Glyph="&#xe7fe;" Size="24" Color="{StaticResource White}"/>
+                </Button.ImageSource>
+            </Button>
+        </Grid>
+
+        <!-- Loading Indicator -->
+        <ActivityIndicator Grid.Row="0" Grid.RowSpan="3" IsVisible="{Binding IsBusy}" IsRunning="{Binding IsBusy}" VerticalOptions="Center" HorizontalOptions="Center"/>
+    </Grid>
+</ContentPage>
