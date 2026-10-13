@@ -65,11 +65,11 @@ Postar no Classroom (3 itens): texto com o link do Git, zip da release do GitHub
 Windows (webcam), emulador Android e celular Android. O banco padrão é **SQLite local**, um arquivo por dispositivo, então cada plataforma tem seus próprios dados (cadastre o logradouro em cada uma). Com MySQL ou SQL Server, o servidor precisa ser alcançável pelo dispositivo: no emulador, `10.0.2.2` aponta para o PC; no celular, use o IP da máquina na rede.
 
 ### 2.7 Critérios de pronto
-- [ ] `dotnet build` sem erros (windows10.0.19041.0 e android)
-- [ ] `dotnet test` passando
-- [ ] Roteiro do vídeo executado de ponta a ponta (Colaborador e Aluno)
-- [ ] Domain, Application e Infrastructure sem alterações (ou alterações aprovadas)
-- [ ] PR aberto para `main`
+- [x] `dotnet build` sem erros e sem avisos (windows10.0.19041.0 e android: 0 avisos, 0 erros)
+- [x] `dotnet test` passando (Domain.Tests 156/156, Infrastructure.Tests 60/60)
+- [ ] Roteiro do vídeo executado de ponta a ponta (Colaborador e Aluno): **pendente, teste manual no app** (não automatizado)
+- [x] Domain, Application e Infrastructure sem alterações
+- [x] PR aberto para `main`
 
 ## 3. Material × Repositório (divergências e decisões)
 
