@@ -69,7 +69,7 @@ Windows (webcam), emulador Android e celular Android. O banco padrão é **SQLit
 - [x] `dotnet test` passando (Domain.Tests 156/156, Infrastructure.Tests 60/60)
 - [ ] Roteiro do vídeo executado de ponta a ponta (Colaborador e Aluno): **pendente, teste manual no app** (não automatizado)
 - [x] Domain, Application e Infrastructure sem alterações
-- [x] PR aberto para `main`
+- [ ] PR aberto para `main` (branch publicada; abrir pelo link de comparação do GitHub, pois o `gh` não está instalado)
 
 ## 3. Material × Repositório (divergências e decisões)
 
