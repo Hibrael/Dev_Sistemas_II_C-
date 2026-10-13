@@ -9,9 +9,13 @@
     <ScrollView>
         <Grid RowDefinitions="Auto,*" Padding="24" RowSpacing="20">
 
-            <!-- Cabeçalho compacto: logo + rótulo + data -->
+            <!-- Cabeçalho: logo (com o nome do autor, obrigatório na avaliação) + rótulo + data.
+                 Tamanho via OnIdiom para o nome do autor ficar legível em cada dispositivo. -->
             <Grid Grid.Row="0" ColumnDefinitions="Auto,*" ColumnSpacing="18">
-                <Image Grid.Column="0" WidthRequest="130" HeightRequest="93" Aspect="AspectFit" VerticalOptions="Center">
+                <Image Grid.Column="0" Aspect="AspectFit" VerticalOptions="Center"
+                       WidthRequest="{OnIdiom Phone=200, Tablet=240, Desktop=260, TV=320, Default=200}"
+                       HeightRequest="{OnIdiom Phone=143, Tablet=172, Desktop=186, TV=229, Default=143}"
+                       SemanticProperties.Description="Logo da Academia do Zé, por Hibrael Andre Cidade Xavier">
                     <Image.Source>
                         <AppThemeBinding Light="academiadoze_claro.png" Dark="academiadoze_escuro.png"/>
                     </Image.Source>
