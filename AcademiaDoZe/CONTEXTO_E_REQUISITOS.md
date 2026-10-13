@@ -32,35 +32,37 @@ Postar no Classroom (3 itens): texto com o link do Git, zip da release do GitHub
 ## 2. Checklist
 
 ### 2.1 Converters (`Converters/`)
-- [ ] `EnumDisplayConverter`
-- [ ] `DateOnlyToDateTimeConverter`
-- [ ] `FotoToImageSourceConverter`
+- [x] `EnumDisplayConverter`
+- [x] `DateOnlyToDateTimeConverter`
+- [x] `FotoToImageSourceConverter`
+- [x] `MascaraConverter` (extra: CPF, telefone e CEP formatados nos cards)
+- [x] `Helpers/PessoaValidacao` (regras comuns de pessoa, espelhando os VOs) e `Helpers/FotoHelper` (galeria/câmera)
 
 ### 2.2 Colaborador
-- [ ] `ColaboradorListViewModel` (filtros Nome, CPF, Id, Email, Tipo, Vínculo; Add, Edit, Refresh, Search, Load, Delete; timeout de 5 s; FK)
-- [ ] `ColaboradorViewModel` (QueryProperty, Pickers, Initialize, Load, SearchByCpf, SearchByCep, Save, Cancel, SelecionarFoto, validação)
-- [ ] `ColaboradorListPage.xaml(.cs)` (DataTemplate, OnIdiom, RefreshView, EmptyView, FAB, ActivityIndicator)
-- [ ] `ColaboradorPage.xaml(.cs)` (CPF, Dados Pessoais + Foto, Endereço, Dados de Trabalho + Salário, ações)
-- [ ] `AppShell.xaml` (FlyoutItem `colaboradores`) e `AppShell.xaml.cs` (rota `colaborador`)
-- [ ] `MauiProgram.cs` (DI)
+- [x] `ColaboradorListViewModel` (filtros Nome, CPF, Id, Email, Tipo, Vínculo; Add, Edit, Refresh, Search, Load, Delete; timeout de 5 s; FK)
+- [x] `ColaboradorViewModel` (QueryProperty, Pickers, Initialize, Load, SearchByCpf, SearchByCep, Save, Cancel, SelecionarFoto, validação)
+- [x] `ColaboradorListPage.xaml(.cs)` (DataTemplate, OnIdiom, RefreshView, EmptyView, FAB, ActivityIndicator)
+- [x] `ColaboradorPage.xaml(.cs)` (CPF, Dados Pessoais + Foto, Endereço, Dados de Trabalho + Salário, ações)
+- [x] `AppShell.xaml` (FlyoutItem `colaboradores`) e `AppShell.xaml.cs` (rota `colaborador`)
+- [x] `MauiProgram.cs` (DI)
 
 ### 2.3 Aluno
-- [ ] `AlunoListViewModel` (filtros Nome via `ObterPorNomeAsync`, CPF, Id, Email)
-- [ ] `AlunoViewModel`
-- [ ] `AlunoListPage.xaml(.cs)`
-- [ ] `AlunoPage.xaml(.cs)`
-- [ ] Shell (`alunos` / `aluno`) e DI
+- [x] `AlunoListViewModel` (filtros Nome via `ObterPorNomeAsync`, CPF, Id, Email)
+- [x] `AlunoViewModel`
+- [x] `AlunoListPage.xaml(.cs)`
+- [x] `AlunoPage.xaml(.cs)`
+- [x] Shell (`alunos` / `aluno`) e DI
 
 ### 2.4 Plataformas
-- [ ] Android: permissão `CAMERA`
-- [ ] iOS e MacCatalyst: `NSCameraUsageDescription`
-- [ ] Windows: verificar `MediaPicker.IsCaptureSupported` / `CapturePhotoAsync`
+- [x] Android: permissão `CAMERA`, `uses-feature` câmera (opcional) e `<queries>` com `IMAGE_CAPTURE` (sem isso, `IsCaptureSupported` é `false` no Android 11+)
+- [x] iOS e MacCatalyst: `NSCameraUsageDescription`
+- [x] Windows: o MAUI 10 tem implementação própria de `CameraCaptureUI` (abre uma janela de captura). App *unpackaged*: a câmera depende de Configurações > Privacidade > Câmera > "Permitir que aplicativos da área de trabalho acessem a câmera". `DeviceCapability webcam` declarada no `Package.appxmanifest` para o caso de empacotamento
 
 ### 2.5 Dashboard
-- [ ] Logo com o nome do autor visível e legível
+- [x] Logo com o nome do autor visível e legível: ampliada via `OnIdiom` (Phone 200×143, Tablet 240×172, Desktop 260×186, TV 320×229)
 
 ### 2.6 Plataformas do vídeo
-Windows (webcam), emulador Android e celular Android. No Android, o host do banco não pode ser `localhost`: no emulador use `10.0.2.2`; no celular, o IP da máquina na rede.
+Windows (webcam), emulador Android e celular Android. O banco padrão é **SQLite local**, um arquivo por dispositivo, então cada plataforma tem seus próprios dados (cadastre o logradouro em cada uma). Com MySQL ou SQL Server, o servidor precisa ser alcançável pelo dispositivo: no emulador, `10.0.2.2` aponta para o PC; no celular, use o IP da máquina na rede.
 
 ### 2.7 Critérios de pronto
 - [ ] `dotnet build` sem erros (windows10.0.19041.0 e android)
@@ -289,3 +291,17 @@ flowchart LR
 ```
 
 A Presentation conhece só DTOs e enums `App*` da Application; não referencia o Domain.
+
+## 7. Dicas para gravar o vídeo
+
+| Etapa | Cuidado |
+|---|---|
+| Antes de começar | Tenha um **Logradouro** cadastrado (o CEP precisa existir em Logradouros). Libere a câmera: Windows (privacidade de apps da área de trabalho) e Android (aceite a permissão na primeira captura). Deixe uma foto `.jpg`/`.png` com até 5 MB na galeria ou em Imagens |
+| Cadastro | Use um **CPF válido**: os dígitos verificadores são conferidos. E-mail **sem ponto antes do `@`** e com um único ponto no domínio (`zetestes@gmail.com`; `ze.testes@gmail.com` e `@empresa.com.br` são recusados pelo VO `Email`). Senha com **8+ caracteres, letras e números** (`Teste1234`). Colaborador: idade ≥ 12, Salário > 0 e, se Tipo = Administrador, Vínculo CLT. Aluno: idade ≥ 14 |
+| Foto na hora | "Alterar foto" → **Câmera**. A imagem já volta comprimida (máx. 1024 px, JPEG 80%) |
+| Filtro por CPF | Na listagem, filtro **CPF**, digite os 11 dígitos (com ou sem pontuação) e clique em **Buscar** |
+| Edição | Botão de lápis → nome **"zé dos testes"** → "Alterar foto" → **Galeria** → **redigite a senha e a confirmação** (o Service exige a senha na edição) → Salvar |
+| Exclusão | Filtro **Nome** "zé" (ignora acentos no Colaborador) ou CPF → lixeira → confirmar |
+
+### Observação sobre o domínio (não alterado)
+A regex do VO `Email` (`^[^@.]+@[^@.]+.[^@.]+$`) recusa e-mails comuns como `nome.sobrenome@x.com` e domínios `.com.br`. A VM replica a regra para avisar antes de salvar. Corrigir o VO exige mudança no Domain e fica para uma decisão futura.
