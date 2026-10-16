@@ -79,19 +79,29 @@ public static class MauiProgram
 
     private static void RemoverBorda(Microsoft.UI.Xaml.Controls.Control controle, string prefixo)
     {
-        var transparente = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
+        static Microsoft.UI.Xaml.Media.SolidColorBrush Transparente() => new(Microsoft.UI.Colors.Transparent);
         var semBorda = new Microsoft.UI.Xaml.Thickness(0);
 
-        foreach (var estado in new[] { "", "PointerOver", "Pressed", "Focused", "Disabled" })
-        {
-            controle.Resources[$"{prefixo}Background{estado}"] = transparente;
-            controle.Resources[$"{prefixo}BorderBrush{estado}"] = transparente;
-        }
-        controle.Resources[$"{prefixo}BorderThemeThickness"] = semBorda;
-        controle.Resources[$"{prefixo}BorderThemeThicknessFocused"] = semBorda;
-
-        controle.Background = transparente;
+        // estado normal: vale para qualquer controle
+        controle.Background = Transparente();
+        controle.BorderBrush = Transparente();
         controle.BorderThickness = semBorda;
+
+        // demais estados (mouse por cima, em foco...): o dicionário de recursos do controle nem sempre
+        // aceita inserções (o CalendarDatePicker do MAUI recusa com COMException); nesse caso fica só o estado normal
+        try
+        {
+            foreach (var estado in new[] { "", "PointerOver", "Pressed", "Focused", "Disabled" })
+            {
+                controle.Resources[$"{prefixo}Background{estado}"] = Transparente();
+                controle.Resources[$"{prefixo}BorderBrush{estado}"] = Transparente();
+            }
+            controle.Resources[$"{prefixo}BorderThemeThickness"] = semBorda;
+            controle.Resources[$"{prefixo}BorderThemeThicknessFocused"] = semBorda;
+        }
+        catch (System.Runtime.InteropServices.COMException)
+        {
+        }
     }
 #endif
 }
