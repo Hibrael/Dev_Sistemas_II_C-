@@ -110,7 +110,7 @@
                         <VerticalStackLayout Grid.Column="0" Spacing="6">
                             <Label Text="Data de nascimento" Style="{StaticResource RotuloCampo}"/>
                             <Border Style="{StaticResource CampoBorda}" Padding="10,0">
-                                <DatePicker Date="{Binding Colaborador.DataNascimento, Converter={StaticResource DateOnlyConverter}, Mode=TwoWay}" MaximumDate="{Binding Hoje}" Format="dd/MM/yyyy"/>
+                                <DatePicker HorizontalOptions="Fill" Date="{Binding Colaborador.DataNascimento, Converter={StaticResource DateOnlyConverter}, Mode=TwoWay}" MaximumDate="{Binding Hoje}" Format="dd/MM/yyyy"/>
                             </Border>
                         </VerticalStackLayout>
                         <VerticalStackLayout Grid.Column="1" Spacing="6">
@@ -237,7 +237,7 @@
                         <VerticalStackLayout Grid.Column="0" Spacing="6">
                             <Label Text="Data de admissão" Style="{StaticResource RotuloCampo}"/>
                             <Border Style="{StaticResource CampoBorda}" Padding="10,0">
-                                <DatePicker Date="{Binding Colaborador.DataAdmissao, Converter={StaticResource DateOnlyConverter}, Mode=TwoWay}" MaximumDate="{Binding Hoje}" Format="dd/MM/yyyy"/>
+                                <DatePicker HorizontalOptions="Fill" Date="{Binding Colaborador.DataAdmissao, Converter={StaticResource DateOnlyConverter}, Mode=TwoWay}" MaximumDate="{Binding Hoje}" Format="dd/MM/yyyy"/>
                             </Border>
                         </VerticalStackLayout>
                         <VerticalStackLayout Grid.Column="1" Spacing="6">

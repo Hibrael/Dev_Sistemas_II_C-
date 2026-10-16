@@ -35,6 +35,39 @@
                     <SolidColorBrush x:Key="NavigationViewItemBackgroundSelectedPointerOver" Color="#1D4ED8"/>
                     <SolidColorBrush x:Key="NavigationViewItemBackgroundSelectedPressed" Color="#1E3A8A"/>
                     <SolidColorBrush x:Key="NavigationViewSelectionIndicatorForeground" Color="#93C5FD"/>
+                    <!-- Campos (Entry, Picker, DatePicker): o controle nativo fica transparente e sem borda,
+                         para que só o contorno arredondado do CampoBorda apareça -->
+                    <SolidColorBrush x:Key="TextControlBackground" Color="Transparent"/>
+                    <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="Transparent"/>
+                    <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="Transparent"/>
+                    <SolidColorBrush x:Key="TextControlBackgroundDisabled" Color="Transparent"/>
+                    <SolidColorBrush x:Key="TextControlBorderBrush" Color="Transparent"/>
+                    <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="Transparent"/>
+                    <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="Transparent"/>
+                    <SolidColorBrush x:Key="TextControlBorderBrushDisabled" Color="Transparent"/>
+                    <Thickness x:Key="TextControlBorderThemeThickness">0</Thickness>
+                    <Thickness x:Key="TextControlBorderThemeThicknessFocused">0</Thickness>
+                    <SolidColorBrush x:Key="ComboBoxBackground" Color="Transparent"/>
+                    <SolidColorBrush x:Key="ComboBoxBackgroundPointerOver" Color="Transparent"/>
+                    <SolidColorBrush x:Key="ComboBoxBackgroundPressed" Color="Transparent"/>
+                    <SolidColorBrush x:Key="ComboBoxBackgroundFocused" Color="Transparent"/>
+                    <SolidColorBrush x:Key="ComboBoxBackgroundDisabled" Color="Transparent"/>
+                    <SolidColorBrush x:Key="ComboBoxBorderBrush" Color="Transparent"/>
+                    <SolidColorBrush x:Key="ComboBoxBorderBrushPointerOver" Color="Transparent"/>
+                    <SolidColorBrush x:Key="ComboBoxBorderBrushPressed" Color="Transparent"/>
+                    <SolidColorBrush x:Key="ComboBoxBorderBrushFocused" Color="Transparent"/>
+                    <SolidColorBrush x:Key="ComboBoxBorderBrushDisabled" Color="Transparent"/>
+                    <Thickness x:Key="ComboBoxBorderThemeThickness">0</Thickness>
+                    <SolidColorBrush x:Key="CalendarDatePickerBackground" Color="Transparent"/>
+                    <SolidColorBrush x:Key="CalendarDatePickerBackgroundPointerOver" Color="Transparent"/>
+                    <SolidColorBrush x:Key="CalendarDatePickerBackgroundPressed" Color="Transparent"/>
+                    <SolidColorBrush x:Key="CalendarDatePickerBackgroundFocused" Color="Transparent"/>
+                    <SolidColorBrush x:Key="CalendarDatePickerBackgroundDisabled" Color="Transparent"/>
+                    <SolidColorBrush x:Key="CalendarDatePickerBorderBrush" Color="Transparent"/>
+                    <SolidColorBrush x:Key="CalendarDatePickerBorderBrushPointerOver" Color="Transparent"/>
+                    <SolidColorBrush x:Key="CalendarDatePickerBorderBrushPressed" Color="Transparent"/>
+                    <SolidColorBrush x:Key="CalendarDatePickerBorderBrushDisabled" Color="Transparent"/>
+                    <Thickness x:Key="CalendarDatePickerBorderThemeThickness">0</Thickness>
                 </ResourceDictionary>
                 <ResourceDictionary x:Key="Dark">
                     <SolidColorBrush x:Key="NavigationViewItemBackgroundPointerOver" Color="#111C33"/>
@@ -43,6 +76,39 @@
                     <SolidColorBrush x:Key="NavigationViewItemBackgroundSelectedPointerOver" Color="#1D4ED8"/>
                     <SolidColorBrush x:Key="NavigationViewItemBackgroundSelectedPressed" Color="#1E3A8A"/>
                     <SolidColorBrush x:Key="NavigationViewSelectionIndicatorForeground" Color="#93C5FD"/>
+                    <!-- Campos (Entry, Picker, DatePicker): o controle nativo fica transparente e sem borda,
+                         para que só o contorno arredondado do CampoBorda apareça -->
+                    <SolidColorBrush x:Key="TextControlBackground" Color="Transparent"/>
+                    <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="Transparent"/>
+                    <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="Transparent"/>
+                    <SolidColorBrush x:Key="TextControlBackgroundDisabled" Color="Transparent"/>
+                    <SolidColorBrush x:Key="TextControlBorderBrush" Color="Transparent"/>
+                    <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="Transparent"/>
+                    <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="Transparent"/>
+                    <SolidColorBrush x:Key="TextControlBorderBrushDisabled" Color="Transparent"/>
+                    <Thickness x:Key="TextControlBorderThemeThickness">0</Thickness>
+                    <Thickness x:Key="TextControlBorderThemeThicknessFocused">0</Thickness>
+                    <SolidColorBrush x:Key="ComboBoxBackground" Color="Transparent"/>
+                    <SolidColorBrush x:Key="ComboBoxBackgroundPointerOver" Color="Transparent"/>
+                    <SolidColorBrush x:Key="ComboBoxBackgroundPressed" Color="Transparent"/>
+                    <SolidColorBrush x:Key="ComboBoxBackgroundFocused" Color="Transparent"/>
+                    <SolidColorBrush x:Key="ComboBoxBackgroundDisabled" Color="Transparent"/>
+                    <SolidColorBrush x:Key="ComboBoxBorderBrush" Color="Transparent"/>
+                    <SolidColorBrush x:Key="ComboBoxBorderBrushPointerOver" Color="Transparent"/>
+                    <SolidColorBrush x:Key="ComboBoxBorderBrushPressed" Color="Transparent"/>
+                    <SolidColorBrush x:Key="ComboBoxBorderBrushFocused" Color="Transparent"/>
+                    <SolidColorBrush x:Key="ComboBoxBorderBrushDisabled" Color="Transparent"/>
+                    <Thickness x:Key="ComboBoxBorderThemeThickness">0</Thickness>
+                    <SolidColorBrush x:Key="CalendarDatePickerBackground" Color="Transparent"/>
+                    <SolidColorBrush x:Key="CalendarDatePickerBackgroundPointerOver" Color="Transparent"/>
+                    <SolidColorBrush x:Key="CalendarDatePickerBackgroundPressed" Color="Transparent"/>
+                    <SolidColorBrush x:Key="CalendarDatePickerBackgroundFocused" Color="Transparent"/>
+                    <SolidColorBrush x:Key="CalendarDatePickerBackgroundDisabled" Color="Transparent"/>
+                    <SolidColorBrush x:Key="CalendarDatePickerBorderBrush" Color="Transparent"/>
+                    <SolidColorBrush x:Key="CalendarDatePickerBorderBrushPointerOver" Color="Transparent"/>
+                    <SolidColorBrush x:Key="CalendarDatePickerBorderBrushPressed" Color="Transparent"/>
+                    <SolidColorBrush x:Key="CalendarDatePickerBorderBrushDisabled" Color="Transparent"/>
+                    <Thickness x:Key="CalendarDatePickerBorderThemeThickness">0</Thickness>
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
         </ResourceDictionary>
