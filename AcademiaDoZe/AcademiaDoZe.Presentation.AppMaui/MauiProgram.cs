@@ -28,6 +28,9 @@ public static class MauiProgram
         // Listas de país, UF e municípios (lidas uma única vez do arquivo embutido)
         builder.Services.AddSingleton<LocalidadesService>();
 
+        // Cadastro de logradouro em modal, aberto pelos formulários de Colaborador e Aluno
+        builder.Services.AddTransient<LogradouroModalService>();
+
         // Registrar ViewModels
         builder.Services.AddTransient<DashboardListViewModel>();
         builder.Services.AddTransient<LogradouroListViewModel>();

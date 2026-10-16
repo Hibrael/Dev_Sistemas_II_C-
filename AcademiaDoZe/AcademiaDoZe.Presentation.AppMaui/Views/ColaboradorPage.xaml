@@ -174,9 +174,15 @@
 
                     <!-- Aviso orientativo se não há endereço vinculado -->
                     <Border Padding="12" StrokeShape="RoundRectangle 12" StrokeThickness="1" BackgroundColor="#143B82F6" Stroke="#4D3B82F6" IsVisible="{Binding HasNoEnderecoVinculado}">
-                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                        <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="10">
                             <Label Grid.Column="0" Text="&#xe88e;" Style="{StaticResource Icone}"/>
-                            <Label Grid.Column="1" Text="Nenhum logradouro vinculado. Digite o CEP acima e clique em 'Buscar CEP'." FontSize="13" VerticalOptions="Center" LineBreakMode="WordWrap"/>
+                            <Label Grid.Column="1" Text="Nenhum logradouro vinculado. Busque o CEP acima ou, se ele ainda não existir, cadastre o logradouro agora." FontSize="13" VerticalOptions="Center" LineBreakMode="WordWrap"/>
+                            <!-- abre o cadastro de Logradouro em modal, já com o CEP digitado -->
+                            <Button Grid.Row="1" Grid.Column="1" Text="Adicionar logradouro" Command="{Binding AdicionarLogradouroCommand}" Style="{StaticResource ButtonSecondary}" HorizontalOptions="Start">
+                                <Button.ImageSource>
+                                    <FontImageSource FontFamily="MaterialIcons" Glyph="&#xe55f;" Color="{AppThemeBinding Light={StaticResource TextoClaro}, Dark={StaticResource TextoEscuro}}"/>
+                                </Button.ImageSource>
+                            </Button>
                         </Grid>
                     </Border>
 

@@ -2,6 +2,7 @@
 using AcademiaDoZe.Application.DTOs;
 using AcademiaDoZe.Application.Interfaces;
 using AcademiaDoZe.Presentation.AppMaui.Helpers;
+using AcademiaDoZe.Presentation.AppMaui.Services;
 using CommunityToolkit.Mvvm.Input;
 
 namespace AcademiaDoZe.Presentation.AppMaui.ViewModels;
@@ -11,6 +12,7 @@ public partial class AlunoViewModel : BaseViewModel
 {
     private readonly IAlunoService _alunoService;
     private readonly ILogradouroService _logradouroService;
+    private readonly LogradouroModalService _logradouroModal;
 
     // OnAppearing pode voltar a disparar ao retornar da câmera/galeria (Android);
     // sem esta trava, um cadastro novo seria limpo no meio do preenchimento
@@ -55,10 +57,11 @@ public partial class AlunoViewModel : BaseViewModel
     public bool HasFoto => Aluno?.Foto?.Conteudo is { Length: > 0 };
     public bool HasNoFoto => !HasFoto;
 
-    public AlunoViewModel(IAlunoService alunoService, ILogradouroService logradouroService)
+    public AlunoViewModel(IAlunoService alunoService, ILogradouroService logradouroService, LogradouroModalService logradouroModal)
     {
         _alunoService = alunoService;
         _logradouroService = logradouroService;
+        _logradouroModal = logradouroModal;
         Title = "Detalhes do Aluno";
     }
 
@@ -251,7 +254,7 @@ public partial class AlunoViewModel : BaseViewModel
             }
             else
             {
-                await Shell.Current.DisplayAlertAsync("Aviso", "CEP não encontrado no cadastro de logradouros. Cadastre o logradouro primeiro.", "OK");
+                await OferecerCadastroLogradouroAsync(apenasDigitos, "CEP não encontrado no cadastro de logradouros.");
             }
         }
         catch (OperationCanceledException)
@@ -299,7 +302,7 @@ public partial class AlunoViewModel : BaseViewModel
                 var logradouroData = await _logradouroService.ObterPorCepAsync(cepLimpo, cts.Token);
                 if (logradouroData == null)
                 {
-                    await Shell.Current.DisplayAlertAsync("Endereço Obrigatório", "O CEP informado não está cadastrado como Logradouro. Cadastre-o previamente.", "OK");
+                    await OferecerCadastroLogradouroAsync(cepLimpo, "O CEP informado não está cadastrado como Logradouro.");
                     return;
                 }
                 Aluno.Endereco = logradouroData;
@@ -347,6 +350,43 @@ public partial class AlunoViewModel : BaseViewModel
                 OnPropertyChanged(nameof(Aluno));
             }
             IsBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task AdicionarLogradouroAsync()
+    {
+        // leva o CEP já digitado para o modal, se estiver completo
+        var cep = PessoaValidacao.ApenasDigitos(Aluno.Endereco?.Cep);
+        await CadastrarLogradouroAsync(cep.Length == 8 ? cep : null);
+    }
+
+    // CEP sem logradouro: oferece cadastrá-lo ali mesmo, num modal
+    private async Task OferecerCadastroLogradouroAsync(string cep, string motivo)
+    {
+        var cadastrar = await Shell.Current.DisplayAlertAsync("Logradouro não cadastrado",
+            $"{motivo}\n\nDeseja cadastrá-lo agora?", "Cadastrar", "Agora não");
+        if (cadastrar)
+            await CadastrarLogradouroAsync(cep);
+    }
+
+    private async Task CadastrarLogradouroAsync(string? cep)
+    {
+        try
+        {
+            IsBusy = false;
+            var novo = await _logradouroModal.CadastrarAsync(cep);
+            if (novo is null)
+                return;
+
+            Aluno.Endereco = novo;
+            OnPropertyChanged(nameof(Aluno));
+            NotificarStatus();
+            await Shell.Current.DisplayAlertAsync("Endereço", "Logradouro cadastrado e vinculado ao aluno. Confira os dados e clique em Salvar.", "OK");
+        }
+        catch (Exception ex)
+        {
+            await Shell.Current.DisplayAlertAsync("Erro", $"Erro ao abrir o cadastro de logradouro: {ex.Message}", "OK");
         }
     }
 

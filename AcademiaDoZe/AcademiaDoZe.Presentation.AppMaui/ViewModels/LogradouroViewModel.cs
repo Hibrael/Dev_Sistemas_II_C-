@@ -118,6 +118,36 @@ public partial class LogradouroViewModel : BaseViewModel
         set => SetProperty(ref _isEditMode, value);
     }
 
+    // ===== Modo modal =====
+    // Aberta pelo cadastro de Colaborador/Aluno (LogradouroModalService): já vem com o CEP digitado,
+    // e ao salvar/cancelar fecha o modal devolvendo o logradouro gravado (ou null).
+    private TaskCompletionSource<LogradouroDto?>? _modal;
+    private string? _cepInicial;
+
+    public void ConfigurarModal(string? cepInicial, TaskCompletionSource<LogradouroDto?> resultado)
+    {
+        _cepInicial = cepInicial;
+        _modal = resultado;
+    }
+
+    /// <summary>Garante o retorno do modal se ele for fechado por fora (ex.: botão voltar do Android).</summary>
+    public void NotificarFechamento() => _modal?.TrySetResult(null);
+
+    private async Task FecharAsync(LogradouroDto? resultado)
+    {
+        if (_modal is null)
+        {
+            await Shell.Current.GoToAsync("..");
+            return;
+        }
+
+        // fecha primeiro: quem abriu o modal só continua (e exibe seus avisos) com a tela de volta
+        var modal = _modal;
+        _modal = null;
+        await Shell.Current.Navigation.PopModalAsync();
+        modal.TrySetResult(resultado);
+    }
+
     public LogradouroViewModel(ILogradouroService logradouroService, LocalidadesService localidades)
     {
         _logradouroService = logradouroService;
@@ -212,7 +242,7 @@ public partial class LogradouroViewModel : BaseViewModel
             Title = "Novo Logradouro";
             Logradouro = new LogradouroDto
             {
-                Cep = string.Empty,
+                Cep = _cepInicial ?? string.Empty,
                 Nome = string.Empty,
                 Bairro = string.Empty,
                 Cidade = string.Empty,
@@ -226,7 +256,7 @@ public partial class LogradouroViewModel : BaseViewModel
     [RelayCommand]
     private async Task CancelAsync()
     {
-        await Shell.Current.GoToAsync("..");
+        await FecharAsync(null);
     }
 
     [RelayCommand]
@@ -331,18 +361,19 @@ public partial class LogradouroViewModel : BaseViewModel
             Logradouro.Cidade = Logradouro.Cidade.Trim();
             Logradouro.Pais = string.IsNullOrWhiteSpace(Logradouro.Pais) ? "Brasil" : Logradouro.Pais.Trim();
 
+            LogradouroDto salvo;
             if (IsEditMode)
             {
-                await _logradouroService.AtualizarAsync(Logradouro, cts.Token);
+                salvo = await _logradouroService.AtualizarAsync(Logradouro, cts.Token);
                 await Shell.Current.DisplayAlertAsync("Sucesso", "Logradouro atualizado com sucesso!", "OK");
             }
             else
             {
-                await _logradouroService.AdicionarAsync(Logradouro, cts.Token);
+                salvo = await _logradouroService.AdicionarAsync(Logradouro, cts.Token);
                 await Shell.Current.DisplayAlertAsync("Sucesso", "Logradouro criado com sucesso!", "OK");
             }
 
-            await Shell.Current.GoToAsync("..");
+            await FecharAsync(salvo);
         }
         catch (OperationCanceledException)
         {
