@@ -15,6 +15,10 @@ public static class FotoHelper
     private const string Galeria = "Galeria";
     private const string Camera = "Câmera";
 
+    // Redução das fotos de câmera: lado maior de até 1024 px, JPEG com qualidade 80
+    private const int TamanhoMaximoPx = 1024;
+    private const int QualidadeJpeg = 80;
+
     // Restringe o seletor às extensões aceitas pelo VO Arquivo (.jpg, .jpeg, .png)
     private static readonly FilePickerFileType TiposPermitidos = new(new Dictionary<DevicePlatform, IEnumerable<string>>
     {
@@ -51,15 +55,21 @@ public static class FotoHelper
                     return null;
                 }
 
+#if WINDOWS
+                // No Windows, o redimensionamento do MediaPicker (MAUI 10) devolve o arquivo com o stream
+                // já fechado ("Cannot access a closed Stream"): captura sem opções e reduz depois, aqui
+                result = await MediaPicker.Default.CapturePhotoAsync(new MediaPickerOptions { Title = "Foto do cadastro" });
+#else
                 // Fotos de câmera costumam passar de 5 MB: o próprio MediaPicker do MAUI 10
                 // redimensiona e recomprime em JPEG antes de devolver o arquivo.
                 result = await MediaPicker.Default.CapturePhotoAsync(new MediaPickerOptions
                 {
                     Title = "Foto do cadastro",
-                    MaximumWidth = 1024,
-                    MaximumHeight = 1024,
-                    CompressionQuality = 80
+                    MaximumWidth = TamanhoMaximoPx,
+                    MaximumHeight = TamanhoMaximoPx,
+                    CompressionQuality = QualidadeJpeg
                 });
+#endif
             }
 
             if (result is null)
@@ -80,25 +90,31 @@ public static class FotoHelper
                 }
             }
 
-            await using var stream = await result.OpenReadAsync();
-            using var ms = new MemoryStream();
-            await stream.CopyToAsync(ms);
+            var conteudo = await LerConteudoAsync(result);
 
-            if (ms.Length == 0)
+#if WINDOWS
+            if (escolha == Camera && conteudo.Length > 0)
+            {
+                conteudo = await ReduzirFotoWindowsAsync(conteudo);
+                nome = Path.ChangeExtension(nome, ".jpg");
+            }
+#endif
+
+            if (conteudo.Length == 0)
             {
                 await Shell.Current.DisplayAlertAsync("Foto inválida", "O arquivo selecionado está vazio.", "OK");
                 return null;
             }
 
-            if (ms.Length > PessoaValidacao.FotoTamanhoMaximoBytes)
+            if (conteudo.LongLength > PessoaValidacao.FotoTamanhoMaximoBytes)
             {
-                var tamanhoMb = ms.Length / 1024d / 1024d;
+                var tamanhoMb = conteudo.LongLength / 1024d / 1024d;
                 await Shell.Current.DisplayAlertAsync("Foto muito grande",
                     $"A imagem tem {tamanhoMb:N1} MB e o limite é 5 MB. Escolha uma imagem menor.", "OK");
                 return null;
             }
 
-            return new ArquivoDto { Conteudo = ms.ToArray(), Nome = nome };
+            return new ArquivoDto { Conteudo = conteudo, Nome = nome };
         }
         catch (PermissionException)
         {
@@ -115,4 +131,65 @@ public static class FotoHelper
 
         return null;
     }
+
+    /// <summary>
+    /// Lê o arquivo escolhido. Se o stream devolvido pelo MAUI já vier fechado,
+    /// lê direto do caminho do arquivo, quando ele existir.
+    /// </summary>
+    private static async Task<byte[]> LerConteudoAsync(FileResult result)
+    {
+        try
+        {
+            await using var stream = await result.OpenReadAsync();
+            using var ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
+            return ms.ToArray();
+        }
+        catch (ObjectDisposedException) when (File.Exists(result.FullPath))
+        {
+            return await File.ReadAllBytesAsync(result.FullPath);
+        }
+    }
+
+#if WINDOWS
+    /// <summary>
+    /// Reduz a foto da câmera com o codificador de imagens do Windows: lado maior de até
+    /// TamanhoMaximoPx (mantendo a proporção e a orientação EXIF) e JPEG com QualidadeJpeg.
+    /// </summary>
+    private static async Task<byte[]> ReduzirFotoWindowsAsync(byte[] original)
+    {
+        using var entrada = new MemoryStream(original).AsRandomAccessStream();
+        var decoder = await Windows.Graphics.Imaging.BitmapDecoder.CreateAsync(entrada);
+
+        var escala = Math.Min(1.0, (double)TamanhoMaximoPx / Math.Max(decoder.PixelWidth, decoder.PixelHeight));
+        var transformacao = new Windows.Graphics.Imaging.BitmapTransform
+        {
+            ScaledWidth = (uint)Math.Max(1, Math.Round(decoder.PixelWidth * escala)),
+            ScaledHeight = (uint)Math.Max(1, Math.Round(decoder.PixelHeight * escala)),
+            InterpolationMode = Windows.Graphics.Imaging.BitmapInterpolationMode.Fant
+        };
+
+        using var bitmap = await decoder.GetSoftwareBitmapAsync(
+            Windows.Graphics.Imaging.BitmapPixelFormat.Bgra8,
+            Windows.Graphics.Imaging.BitmapAlphaMode.Premultiplied,
+            transformacao,
+            Windows.Graphics.Imaging.ExifOrientationMode.RespectExifOrientation,
+            Windows.Graphics.Imaging.ColorManagementMode.DoNotColorManage);
+
+        using var saida = new Windows.Storage.Streams.InMemoryRandomAccessStream();
+        var opcoes = new Windows.Graphics.Imaging.BitmapPropertySet
+        {
+            { "ImageQuality", new Windows.Graphics.Imaging.BitmapTypedValue(QualidadeJpeg / 100f, Windows.Foundation.PropertyType.Single) }
+        };
+        var encoder = await Windows.Graphics.Imaging.BitmapEncoder.CreateAsync(
+            Windows.Graphics.Imaging.BitmapEncoder.JpegEncoderId, saida, opcoes);
+        encoder.SetSoftwareBitmap(bitmap);
+        await encoder.FlushAsync();
+
+        saida.Seek(0);
+        using var ms = new MemoryStream();
+        await saida.AsStreamForRead().CopyToAsync(ms);
+        return ms.ToArray();
+    }
+#endif
 }
