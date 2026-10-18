@@ -28,5 +28,7 @@
 	</array>
 	<key>XSAppIconAssets</key>
 	<string>Assets.xcassets/appicon.appiconset</string>
+	<key>NSCameraUsageDescription</key>
+	<string>A Academia do Zé usa a câmera para tirar a foto do cadastro de alunos e colaboradores.</string>
 </dict>
 </plist>

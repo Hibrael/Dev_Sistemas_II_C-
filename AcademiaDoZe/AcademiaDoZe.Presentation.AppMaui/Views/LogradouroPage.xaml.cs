@@ -18,4 +18,15 @@ public partial class LogradouroPage : ContentPage
             await viewModel.InitializeAsync();
         }
     }
+
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+
+        // aberta como modal: fechada por fora (ex.: voltar do Android), devolve "cancelado"
+        if (BindingContext is LogradouroViewModel viewModel)
+        {
+            viewModel.NotificarFechamento();
+        }
+    }
 }
