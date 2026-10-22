@@ -37,6 +37,7 @@
     <Color x:Key="HeroInicio">#1E40AF</Color>
     <Color x:Key="HeroFim">#0A1430</Color>
     <Color x:Key="Sucesso">#22C55E</Color>
+    <Color x:Key="Alerta">#F59E0B</Color>
 
     <Color x:Key="White">White</Color>
     <Color x:Key="Black">Black</Color>
