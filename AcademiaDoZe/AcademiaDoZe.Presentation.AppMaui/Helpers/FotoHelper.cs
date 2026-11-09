@@ -9,11 +9,13 @@ namespace AcademiaDoZe.Presentation.AppMaui.Helpers;
 /// pronto para ser persistido.
 ///
 /// Como o domínio exige foto, não há opção de remover: apenas trocar.
+/// O laudo médico da Matrícula reaproveita o mesmo fluxo por ObterAsync; lá o laudo é
+/// opcional, então a remoção fica a cargo da própria tela.
 /// </summary>
 public static class FotoHelper
 {
-    private const string Galeria = "Galeria";
-    private const string Camera = "Câmera";
+    public const string Galeria = "Galeria";
+    public const string Camera = "Câmera";
 
     // Redução das fotos de câmera: lado maior de até 1024 px, JPEG com qualidade 80
     private const int TamanhoMaximoPx = 1024;
@@ -34,20 +36,29 @@ public static class FotoHelper
     /// </summary>
     public static async Task<ArquivoDto?> SelecionarAsync()
     {
+        var escolha = await Shell.Current.DisplayActionSheetAsync("Origem da foto", "Cancelar", null, Galeria, Camera);
+        return await ObterAsync(escolha);
+    }
+
+    /// <summary>
+    /// Lê a imagem da origem já escolhida (Galeria ou Câmera); qualquer outra escolha devolve null.
+    /// Os títulos permitem reaproveitar o fluxo para outras imagens, como o laudo médico da matrícula.
+    /// </summary>
+    public static async Task<ArquivoDto?> ObterAsync(string? origem,
+        string tituloSeletor = "Selecione uma foto (.jpg ou .png)", string tituloCamera = "Foto do cadastro")
+    {
         try
         {
-            var escolha = await Shell.Current.DisplayActionSheetAsync("Origem da foto", "Cancelar", null, Galeria, Camera);
-
             FileResult? result = null;
-            if (escolha == Galeria)
+            if (origem == Galeria)
             {
                 result = await FilePicker.Default.PickAsync(new PickOptions
                 {
-                    PickerTitle = "Selecione uma foto (.jpg ou .png)",
+                    PickerTitle = tituloSeletor,
                     FileTypes = TiposPermitidos
                 });
             }
-            else if (escolha == Camera)
+            else if (origem == Camera)
             {
                 if (!MediaPicker.Default.IsCaptureSupported)
                 {
@@ -58,13 +69,13 @@ public static class FotoHelper
 #if WINDOWS
                 // No Windows, o redimensionamento do MediaPicker (MAUI 10) devolve o arquivo com o stream
                 // já fechado ("Cannot access a closed Stream"): captura sem opções e reduz depois, aqui
-                result = await MediaPicker.Default.CapturePhotoAsync(new MediaPickerOptions { Title = "Foto do cadastro" });
+                result = await MediaPicker.Default.CapturePhotoAsync(new MediaPickerOptions { Title = tituloCamera });
 #else
                 // Fotos de câmera costumam passar de 5 MB: o próprio MediaPicker do MAUI 10
                 // redimensiona e recomprime em JPEG antes de devolver o arquivo.
                 result = await MediaPicker.Default.CapturePhotoAsync(new MediaPickerOptions
                 {
-                    Title = "Foto do cadastro",
+                    Title = tituloCamera,
                     MaximumWidth = TamanhoMaximoPx,
                     MaximumHeight = TamanhoMaximoPx,
                     CompressionQuality = QualidadeJpeg
@@ -78,7 +89,7 @@ public static class FotoHelper
             var nome = result.FileName;
             if (!PessoaValidacao.FotoExtensaoValida(nome))
             {
-                if (escolha == Camera)
+                if (origem == Camera)
                 {
                     // a câmera já devolve JPEG; só o nome pode vir sem extensão conhecida
                     nome = Path.ChangeExtension(string.IsNullOrWhiteSpace(nome) ? "foto_camera" : nome, ".jpg");
@@ -93,7 +104,7 @@ public static class FotoHelper
             var conteudo = await LerConteudoAsync(result);
 
 #if WINDOWS
-            if (escolha == Camera && conteudo.Length > 0)
+            if (origem == Camera && conteudo.Length > 0)
             {
                 conteudo = await ReduzirFotoWindowsAsync(conteudo);
                 nome = Path.ChangeExtension(nome, ".jpg");
