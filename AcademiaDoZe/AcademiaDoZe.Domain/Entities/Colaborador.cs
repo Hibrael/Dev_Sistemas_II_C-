@@ -18,6 +18,14 @@ namespace AcademiaDoZe.Domain.Entities
         // (salário) já presentes na versão anterior do projeto e mantidas aqui.
         public decimal Salario { get; private set; }
 
+        /// <summary>
+        /// Tempo máximo que o colaborador pode ficar na academia por dia, somando todas as
+        /// entradas/saídas: 6 horas para estágio e 8 horas para os demais vínculos (CLT e PJ).
+        /// </summary>
+        public TimeSpan JornadaDiariaMaxima => Vinculo == ColaboradorVinculo.Estagio
+            ? TimeSpan.FromHours(6)
+            : TimeSpan.FromHours(8);
+
         private Colaborador(int id, string nome, Cpf cpf, DateOnly dataNascimento, Telefone telefone, Email email,
             Endereco endereco, Senha senha, Arquivo foto, DateOnly dataAdmissao, ColaboradorTipo tipo,
             ColaboradorVinculo vinculo, decimal salario)

@@ -40,4 +40,60 @@ public class AcessoColaboradorTests
     {
         Assert.Throws<ArgumentNullException>(() => AcessoColaborador.Criar(1, null!));
     }
+
+    private static Colaborador GetColaboradorComVinculo(ColaboradorVinculo vinculo) =>
+        Colaborador.Criar(
+            2, "Ciclano de Tal", "529.982.247-25",
+            DateOnly.FromDateTime(DateTime.Today.AddYears(-22)),
+            "(11) 91234-5678", "ciclano@example.com",
+            GetValidLogradouro(), "123", null, "Abcdef12", GetValidArquivo(),
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(-3)),
+            ColaboradorTipo.Atendente, vinculo, 1500m).Value!;
+
+    [Theory(DisplayName = "Colaborador: jornada diária máxima conforme o vínculo")]
+    [InlineData(ColaboradorVinculo.CLT, 8)]
+    [InlineData(ColaboradorVinculo.PJ, 8)]
+    [InlineData(ColaboradorVinculo.Estagio, 6)]
+    public void Deve_Definir_JornadaDiariaMaxima_Por_Vinculo(ColaboradorVinculo vinculo, int horas)
+    {
+        Assert.Equal(TimeSpan.FromHours(horas), GetColaboradorComVinculo(vinculo).JornadaDiariaMaxima);
+    }
+
+    [Fact(DisplayName = "AcessoColaborador: RegistrarSaida fecha o acesso e calcula a permanência")]
+    public void Deve_Calcular_Permanencia_Quando_RegistrarSaida()
+    {
+        var entrada = new DateTime(2026, 11, 16, 8, 0, 0, DateTimeKind.Utc);
+        var acesso = AcessoColaborador.Restaurar(1, GetValidColaborador(), entrada);
+
+        acesso.RegistrarSaida(entrada.AddHours(4));
+
+        Assert.False(acesso.EmAberto);
+        Assert.Equal(TimeSpan.FromHours(4), acesso.Permanencia);
+    }
+
+    [Fact(DisplayName = "AcessoColaborador: saída registrada duas vezes -> DomainException")]
+    public void Deve_Lancar_Excecao_Quando_SaidaJaRegistrada()
+    {
+        var entrada = new DateTime(2026, 11, 16, 8, 0, 0, DateTimeKind.Utc);
+        var acesso = AcessoColaborador.Restaurar(1, GetValidColaborador(), entrada, entrada.AddHours(1));
+
+        Assert.Throws<AcademiaDoZe.Domain.Exceptions.DomainException>(() => acesso.RegistrarSaida(entrada.AddHours(2)));
+    }
+
+    [Fact(DisplayName = "AcessoColaborador: SomarPermanencia soma todos os registros do dia, o aberto até a referência")]
+    public void Deve_Somar_Permanencia_De_Todos_Os_Registros()
+    {
+        var colaborador = GetValidColaborador();
+        var dia = new DateTime(2026, 11, 16, 0, 0, 0, DateTimeKind.Utc);
+        var acessos = new[]
+        {
+            AcessoColaborador.Restaurar(1, colaborador, dia.AddHours(8), dia.AddHours(12)),               // 4 h
+            AcessoColaborador.Restaurar(2, colaborador, dia.AddHours(13), dia.AddHours(15).AddMinutes(30)), // 2 h 30
+            AcessoColaborador.Restaurar(3, colaborador, dia.AddHours(16))                                   // aberto: 1 h até a referência
+        };
+
+        var total = AcessoColaborador.SomarPermanencia(acessos, dia.AddHours(17));
+
+        Assert.Equal(TimeSpan.FromHours(7.5), total);
+    }
 }

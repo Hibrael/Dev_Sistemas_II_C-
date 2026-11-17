@@ -18,13 +18,18 @@ namespace AcademiaDoZe.Infrastructure.Repositories
     {
         // Os nomes/aliases das colunas do aluno e do logradouro precisam bater exatamente com
         // os que AlunoRepository.Map espera ler.
-        private const string BaseSelectQuery = "SELECT ac.id_acesso, ac.data_hora, a.id_aluno, a.cpf, a.nome, a.nascimento, a.telefone, a.email, a.logradouro_id, a.numero, a.complemento, a.senha, a.foto, l.id_logradouro, l.cep, l.nome AS logradouro_nome, l.bairro, l.cidade, l.estado, l.pais FROM tb_acesso ac INNER JOIN tb_aluno a ON ac.pessoa_id = a.id_aluno INNER JOIN tb_logradouro l ON a.logradouro_id = l.id_logradouro";
+        private const string BaseSelectQuery = "SELECT ac.id_acesso, ac.data_hora, ac.data_hora_saida, a.id_aluno, a.cpf, a.nome, a.nascimento, a.telefone, a.email, a.logradouro_id, a.numero, a.complemento, a.senha, a.foto, l.id_logradouro, l.cep, l.nome AS logradouro_nome, l.bairro, l.cidade, l.estado, l.pais FROM tb_acesso ac INNER JOIN tb_aluno a ON ac.pessoa_id = a.id_aluno INNER JOIN tb_logradouro l ON a.logradouro_id = l.id_logradouro";
 
         public AcessoAlunoRepository(string connectionString, DatabaseType databaseType) : base(connectionString, databaseType) { }
 
         public async Task<AcessoAluno?> ObterPorId(int id, CancellationToken cancellationToken = default) => await QueryOne($"{BaseSelectQuery} WHERE ac.id_acesso = @Id AND ac.pessoa_tipo = @PessoaTipo", c => { c.AddParameter("@Id", id, DbType.Int32); AddPessoaTipo(c); }, cancellationToken);
 
         public async Task<IEnumerable<AcessoAluno>> ObterTodos(CancellationToken cancellationToken = default) => await QueryMany($"{BaseSelectQuery} WHERE ac.pessoa_tipo = @PessoaTipo ORDER BY ac.data_hora DESC", AddPessoaTipo, cancellationToken);
+
+        // "Em aberto" = entrada sem saída registrada: o aluno passou pela catraca e ainda está lá dentro.
+        public async Task<AcessoAluno?> ObterEmAbertoPorAluno(int alunoId, CancellationToken cancellationToken = default) => await QueryOne($"{BaseSelectQuery} WHERE ac.pessoa_tipo = @PessoaTipo AND ac.pessoa_id = @PessoaId AND ac.data_hora_saida IS NULL ORDER BY ac.data_hora DESC", c => { AddPessoaTipo(c); c.AddParameter("@PessoaId", alunoId, DbType.Int32); }, cancellationToken);
+
+        public async Task<IEnumerable<AcessoAluno>> ObterEmAberto(CancellationToken cancellationToken = default) => await QueryMany($"{BaseSelectQuery} WHERE ac.pessoa_tipo = @PessoaTipo AND ac.data_hora_saida IS NULL ORDER BY ac.data_hora DESC", AddPessoaTipo, cancellationToken);
 
         private async Task<AcessoAluno?> QueryOne(string sql, Action<DbCommand> addParameters, CancellationToken cancellationToken)
         {
@@ -46,7 +51,7 @@ namespace AcademiaDoZe.Infrastructure.Repositories
 
                 // Restaurar (e não Criar) porque a DataHora tem de ser a gravada no banco:
                 // Criar carimbaria DateTime.UtcNow e perderia o instante real do check-in.
-                return AcessoAluno.Restaurar(reader.GetInt32Value("id_acesso"), aluno, reader.GetDateTimeValue("data_hora"));
+                return AcessoAluno.Restaurar(reader.GetInt32Value("id_acesso"), aluno, reader.GetDateTimeValue("data_hora"), reader.GetNullableDateTime("data_hora_saida"));
             }
             catch (InfrastructureException) { throw; }
             catch (Exception ex) { throw new InfrastructureException("ERRO_MAPEAMENTO_ACESSO_ALUNO", ex.Message, ex); }
@@ -54,7 +59,7 @@ namespace AcademiaDoZe.Infrastructure.Repositories
 
         public async Task<AcessoAluno> Adicionar(AcessoAluno entity, CancellationToken cancellationToken = default)
         {
-            const string sql = "INSERT INTO tb_acesso (pessoa_tipo, pessoa_id, data_hora) VALUES (@PessoaTipo, @PessoaId, @DataHora)";
+            const string sql = "INSERT INTO tb_acesso (pessoa_tipo, pessoa_id, data_hora, data_hora_saida) VALUES (@PessoaTipo, @PessoaId, @DataHora, @DataHoraSaida)";
             try
             {
                 await using var command = await CreateCommandAsync(FormatInsertQuery(sql), cancellationToken);
@@ -63,14 +68,14 @@ namespace AcademiaDoZe.Infrastructure.Repositories
 
                 // A entidade é imutável (Id com setter protegido e sem mutator), então devolve-se
                 // uma nova instância já com o Id gerado, em vez de escrever na propriedade.
-                return AcessoAluno.Restaurar(id, entity.Aluno, entity.DataHora);
+                return AcessoAluno.Restaurar(id, entity.Aluno, entity.DataHora, entity.DataHoraSaida);
             }
             catch (DbException ex) { throw new InfrastructureException("ERRO_ADICIONAR_ACESSO_ALUNO", ex.Message, ex); }
         }
 
         public async Task<AcessoAluno> Atualizar(AcessoAluno entity, CancellationToken cancellationToken = default)
         {
-            const string sql = "UPDATE tb_acesso SET pessoa_id = @PessoaId, data_hora = @DataHora WHERE id_acesso = @Id AND pessoa_tipo = @PessoaTipo";
+            const string sql = "UPDATE tb_acesso SET pessoa_id = @PessoaId, data_hora = @DataHora, data_hora_saida = @DataHoraSaida WHERE id_acesso = @Id AND pessoa_tipo = @PessoaTipo";
             try
             {
                 await using var command = await CreateCommandAsync(sql, cancellationToken);
@@ -87,6 +92,7 @@ namespace AcademiaDoZe.Infrastructure.Repositories
             AddPessoaTipo(command);
             command.AddParameter("@PessoaId", entity.Aluno.Id, DbType.Int32);
             command.AddParameter("@DataHora", entity.DataHora, DbType.DateTime);
+            command.AddParameter("@DataHoraSaida", entity.DataHoraSaida, DbType.DateTime);
         }
 
         private static void AddPessoaTipo(DbCommand command) => command.AddParameter("@PessoaTipo", (int)PessoaTipo.Aluno, DbType.Int32);

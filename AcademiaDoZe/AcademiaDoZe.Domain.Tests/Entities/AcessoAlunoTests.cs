@@ -1,5 +1,6 @@
 // AcademiaDoZe.Domain.Tests
 using AcademiaDoZe.Domain.Entities;
+using AcademiaDoZe.Domain.Exceptions;
 using AcademiaDoZe.Domain.ValueObjects;
 
 namespace AcademiaDoZe.Domain.Tests.Entities;
@@ -36,5 +37,45 @@ public class AcessoAlunoTests
     public void Deve_Lancar_Excecao_Quando_AlunoNulo()
     {
         Assert.Throws<ArgumentNullException>(() => AcessoAluno.Criar(1, null!));
+    }
+
+    [Fact(DisplayName = "AcessoAluno: novo acesso fica em aberto, sem saída nem permanência")]
+    public void Deve_Ficar_EmAberto_Quando_Criado()
+    {
+        var acesso = AcessoAluno.Criar(1, GetValidAluno());
+
+        Assert.True(acesso.EmAberto);
+        Assert.Null(acesso.DataHoraSaida);
+        Assert.Null(acesso.Permanencia);
+    }
+
+    [Fact(DisplayName = "AcessoAluno: RegistrarSaida fecha o acesso e calcula a permanência")]
+    public void Deve_Calcular_Permanencia_Quando_RegistrarSaida()
+    {
+        var entrada = new DateTime(2026, 11, 16, 10, 0, 0, DateTimeKind.Utc);
+        var acesso = AcessoAluno.Restaurar(1, GetValidAluno(), entrada);
+
+        acesso.RegistrarSaida(entrada.AddMinutes(95));
+
+        Assert.False(acesso.EmAberto);
+        Assert.Equal(TimeSpan.FromMinutes(95), acesso.Permanencia);
+    }
+
+    [Fact(DisplayName = "AcessoAluno: saída registrada duas vezes -> DomainException")]
+    public void Deve_Lancar_Excecao_Quando_SaidaJaRegistrada()
+    {
+        var entrada = new DateTime(2026, 11, 16, 10, 0, 0, DateTimeKind.Utc);
+        var acesso = AcessoAluno.Restaurar(1, GetValidAluno(), entrada, entrada.AddHours(1));
+
+        Assert.Throws<DomainException>(() => acesso.RegistrarSaida(entrada.AddHours(2)));
+    }
+
+    [Fact(DisplayName = "AcessoAluno: saída anterior à entrada -> DomainException")]
+    public void Deve_Lancar_Excecao_Quando_SaidaAntesDaEntrada()
+    {
+        var entrada = new DateTime(2026, 11, 16, 10, 0, 0, DateTimeKind.Utc);
+        var acesso = AcessoAluno.Restaurar(1, GetValidAluno(), entrada);
+
+        Assert.Throws<DomainException>(() => acesso.RegistrarSaida(entrada.AddMinutes(-1)));
     }
 }

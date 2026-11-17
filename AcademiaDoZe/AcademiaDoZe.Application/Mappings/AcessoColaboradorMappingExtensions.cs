@@ -45,7 +45,8 @@ namespace AcademiaDoZe.Application.Mappings
                 Tipo = colaborador.Tipo.ToString(),
                 Vinculo = colaborador.Vinculo.ToString(),
                 Salario = colaborador.Salario,
-                DataHora = entity.DataHora
+                DataHora = entity.DataHora,
+                DataHoraSaida = entity.DataHoraSaida
             };
         }
 
@@ -99,7 +100,7 @@ namespace AcademiaDoZe.Application.Mappings
             // no AtualizarAsync, que senão reescreveria o horário real do acesso com "agora".
             return dto.DataHora == default
                 ? AcessoColaborador.Criar(dto.Id, colaboradorResult.Value!)
-                : AcessoColaborador.Restaurar(dto.Id, colaboradorResult.Value!, dto.DataHora);
+                : AcessoColaborador.Restaurar(dto.Id, colaboradorResult.Value!, dto.DataHora, dto.DataHoraSaida);
         }
 
         private static string FormatErrors(IEnumerable<Notificacoes> notificacoes) =>

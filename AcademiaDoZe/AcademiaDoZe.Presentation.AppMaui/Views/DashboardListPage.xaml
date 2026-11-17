@@ -27,7 +27,7 @@
             </Grid>
 
             <!-- Mosaico de indicadores -->
-            <Grid Grid.Row="1" ColumnDefinitions="1.3*,*,*" RowDefinitions="Auto,Auto" ColumnSpacing="16" RowSpacing="16">
+            <Grid Grid.Row="1" ColumnDefinitions="1.3*,*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="16" RowSpacing="16">
 
                 <!-- Destaque: Alunos -->
                 <Border Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" StrokeThickness="0" StrokeShape="RoundRectangle 18" Padding="22">
@@ -133,6 +133,40 @@
                             <ProgressBar Progress="{Binding PercentualMatriculasAtivas}" ProgressColor="{StaticResource AzulClaro}" Margin="0,12,120,0"/>
                             <HorizontalStackLayout Spacing="4" Margin="0,14,0,0">
                                 <Label Text="Abrir" FontFamily="OpenSansSemibold" FontSize="13" TextColor="{StaticResource AzulClaro}"/>
+                                <Label Text="&#xe5c8;" Style="{StaticResource Icone}" FontSize="16"/>
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
+                    </Grid>
+                </Border>
+                <!-- Catraca (largo): quem está na academia agora -->
+                <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Style="{StaticResource CardBorder}">
+                    <Border.Behaviors>
+                        <behaviors:CardHoverBehavior/>
+                    </Border.Behaviors>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding NavigateToCatracaCommand}"/>
+                    </Border.GestureRecognizers>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Grid.ColumnSpan="2" Text="&#xeb4f;" FontFamily="MaterialIcons" FontSize="120" TextColor="{StaticResource AzulClaro}" Opacity="0.09"
+                               HorizontalOptions="End" VerticalOptions="End" Margin="0,0,-14,-26"/>
+                        <VerticalStackLayout Grid.Column="0" Spacing="4">
+                            <HorizontalStackLayout Spacing="8">
+                                <Label Text="&#xeb4f;" Style="{StaticResource Icone}" FontSize="18"/>
+                                <Label Text="Catraca" Style="{StaticResource RotuloMaiusculo}"/>
+                            </HorizontalStackLayout>
+                            <Label Text="{Binding NaAcademiaAgora}" Style="{StaticResource NumeroGrande}"/>
+                            <Label Style="{StaticResource TextoSecundario}">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="na academia agora · "/>
+                                        <Span Text="{Binding AlunosNaAcademia, StringFormat='{0} aluno(s)'}"/>
+                                        <Span Text=" e "/>
+                                        <Span Text="{Binding ColaboradoresNaAcademia, StringFormat='{0} colaborador(es)'}"/>
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                            <HorizontalStackLayout Spacing="4" Margin="0,14,0,0">
+                                <Label Text="Registrar entrada/saída" FontFamily="OpenSansSemibold" FontSize="13" TextColor="{StaticResource AzulClaro}"/>
                                 <Label Text="&#xe5c8;" Style="{StaticResource Icone}" FontSize="16"/>
                             </HorizontalStackLayout>
                         </VerticalStackLayout>

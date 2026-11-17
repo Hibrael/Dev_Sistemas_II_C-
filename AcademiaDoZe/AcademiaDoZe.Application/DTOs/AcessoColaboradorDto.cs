@@ -47,5 +47,11 @@ namespace AcademiaDoZe.Application.DTOs
         /// real do acesso numa atualização.
         /// </summary>
         public DateTime DataHora { get; init; }
+
+        /// <summary>
+        /// Instante da saída (UTC). Nulo enquanto a pessoa ainda está na academia; registrado
+        /// pela catraca (RegistrarSaidaAsync), nunca informado na entrada.
+        /// </summary>
+        public DateTime? DataHoraSaida { get; init; }
     }
 }

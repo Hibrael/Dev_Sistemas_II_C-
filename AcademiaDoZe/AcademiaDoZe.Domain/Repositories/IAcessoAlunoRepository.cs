@@ -10,5 +10,11 @@ namespace AcademiaDoZe.Domain.Repositories
         Task<AcessoAluno> Adicionar(AcessoAluno entity, CancellationToken cancellationToken = default);
         Task<AcessoAluno> Atualizar(AcessoAluno entity, CancellationToken cancellationToken = default);
         Task<bool> Remover(int id, CancellationToken cancellationToken = default);
+
+        /// <summary>Acesso do aluno ainda sem saída (ele está na academia), se houver.</summary>
+        Task<AcessoAluno?> ObterEmAbertoPorAluno(int alunoId, CancellationToken cancellationToken = default);
+
+        /// <summary>Todos os acessos ainda sem saída: os alunos que estão na academia agora.</summary>
+        Task<IEnumerable<AcessoAluno>> ObterEmAberto(CancellationToken cancellationToken = default);
     }
 }
