@@ -25,6 +25,7 @@ namespace AcademiaDoZe.Infrastructure.Data
                 await using var command = DbProvider.CreateCommand(ObterScript(databaseType), connection);
                 await command.ExecuteNonQueryAsync(cancellationToken);
                 await GarantirColunaSalarioAsync(connection, databaseType, cancellationToken);
+                await GarantirColunaDataHoraSaidaAsync(connection, databaseType, cancellationToken);
                 BancosInicializados.TryAdd(key, true);
             }
             catch (DbException ex)
@@ -53,6 +54,29 @@ namespace AcademiaDoZe.Infrastructure.Data
             if (colunaExiste) return;
 
             await using var alterCommand = DbProvider.CreateCommand("ALTER TABLE tb_colaborador ADD salario DECIMAL(10,2) NOT NULL DEFAULT 0", connection);
+            await alterCommand.ExecuteNonQueryAsync(cancellationToken);
+        }
+
+        // A catraca passou a registrar também a saída (tb_acesso.data_hora_saida). Assim como em
+        // GarantirColunaSalarioAsync, um banco criado antes dessa coluna ficaria com a tabela antiga,
+        // já que o script só cria tabelas inexistentes. Aqui SQLite também precisa do ajuste: o banco
+        // do aplicativo é um arquivo que persiste entre execuções, diferente do banco dos testes.
+        private static async Task GarantirColunaDataHoraSaidaAsync(DbConnection connection, DatabaseType databaseType, CancellationToken cancellationToken)
+        {
+            var verificacaoSql = databaseType switch
+            {
+                DatabaseType.SqlServer => "SELECT COL_LENGTH('tb_acesso', 'data_hora_saida')",
+                DatabaseType.MySql => "SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'tb_acesso' AND column_name = 'data_hora_saida'",
+                _ => "SELECT COUNT(*) FROM pragma_table_info('tb_acesso') WHERE name = 'data_hora_saida'"
+            };
+
+            await using var verificacaoCommand = DbProvider.CreateCommand(verificacaoSql, connection);
+            var resultado = await verificacaoCommand.ExecuteScalarAsync(cancellationToken);
+            var colunaExiste = databaseType == DatabaseType.SqlServer ? resultado is not null and not DBNull : Convert.ToInt32(resultado) > 0;
+            if (colunaExiste) return;
+
+            var tipoColuna = databaseType == DatabaseType.Sqlite ? "TEXT" : "DATETIME";
+            await using var alterCommand = DbProvider.CreateCommand($"ALTER TABLE tb_acesso ADD data_hora_saida {tipoColuna} NULL", connection);
             await alterCommand.ExecuteNonQueryAsync(cancellationToken);
         }
 

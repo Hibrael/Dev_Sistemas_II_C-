@@ -8,6 +8,8 @@ public partial class DashboardListViewModel : BaseViewModel
     private readonly IAlunoService _alunoService;
     private readonly IColaboradorService _colaboradorService;
     private readonly IMatriculaService _matriculaService;
+    private readonly IAcessoAlunoService _acessoAlunoService;
+    private readonly IAcessoColaboradorService _acessoColaboradorService;
 
     private int _totalLogradouros;
     public int TotalLogradouros { get => _totalLogradouros; set => SetProperty(ref _totalLogradouros, value); }
@@ -28,6 +30,14 @@ public partial class DashboardListViewModel : BaseViewModel
     private double _percentualAlunosMatriculados;
     public double PercentualAlunosMatriculados { get => _percentualAlunosMatriculados; set => SetProperty(ref _percentualAlunosMatriculados, value); }
 
+    // catraca: quem entrou e ainda não saiu
+    private int _alunosNaAcademia;
+    public int AlunosNaAcademia { get => _alunosNaAcademia; set => SetProperty(ref _alunosNaAcademia, value); }
+    private int _colaboradoresNaAcademia;
+    public int ColaboradoresNaAcademia { get => _colaboradoresNaAcademia; set => SetProperty(ref _colaboradoresNaAcademia, value); }
+    private int _naAcademiaAgora;
+    public int NaAcademiaAgora { get => _naAcademiaAgora; set => SetProperty(ref _naAcademiaAgora, value); }
+
     // data por extenso no cabeçalho, ex.: "Sábado, 03 de outubro de 2026"
     public string DataHoje
     {
@@ -38,12 +48,15 @@ public partial class DashboardListViewModel : BaseViewModel
         }
     }
 
-    public DashboardListViewModel(ILogradouroService logradouroService, IAlunoService alunoService, IColaboradorService colaboradorService, IMatriculaService matriculaService)
+    public DashboardListViewModel(ILogradouroService logradouroService, IAlunoService alunoService, IColaboradorService colaboradorService, IMatriculaService matriculaService,
+        IAcessoAlunoService acessoAlunoService, IAcessoColaboradorService acessoColaboradorService)
     {
         _logradouroService = logradouroService;
         _alunoService = alunoService;
         _colaboradorService = colaboradorService;
         _matriculaService = matriculaService;
+        _acessoAlunoService = acessoAlunoService;
+        _acessoColaboradorService = acessoColaboradorService;
         Title = "Dashboard";
     }
 
@@ -63,8 +76,14 @@ public partial class DashboardListViewModel : BaseViewModel
             var alunosTask = _alunoService.ObterTodosAsync(cts.Token);
             var colaboradoresTask = _colaboradorService.ObterTodosAsync(cts.Token);
             var matriculasTask = _matriculaService.ObterTodasAsync(cts.Token);
+            var alunosPresentesTask = _acessoAlunoService.ObterEmAbertoAsync(cts.Token);
+            var colaboradoresPresentesTask = _acessoColaboradorService.ObterEmAbertoAsync(cts.Token);
 
-            await Task.WhenAll(logradourosTask, alunosTask, colaboradoresTask, matriculasTask);
+            await Task.WhenAll(logradourosTask, alunosTask, colaboradoresTask, matriculasTask, alunosPresentesTask, colaboradoresPresentesTask);
+
+            AlunosNaAcademia = (await alunosPresentesTask).Count();
+            ColaboradoresNaAcademia = (await colaboradoresPresentesTask).Count();
+            NaAcademiaAgora = AlunosNaAcademia + ColaboradoresNaAcademia;
 
             var matriculas = (await matriculasTask).ToList();
 
@@ -105,4 +124,6 @@ public partial class DashboardListViewModel : BaseViewModel
     private async Task NavigateToColaboradoresAsync() => await Shell.Current.GoToAsync("//colaboradores");
     [RelayCommand]
     private async Task NavigateToMatriculasAsync() => await Shell.Current.GoToAsync("//matriculas");
+    [RelayCommand]
+    private async Task NavigateToCatracaAsync() => await Shell.Current.GoToAsync("//catraca");
 }

@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Hibrael Andre Cidade Xavier -->
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="AcademiaDoZe.Presentation.AppMaui.Views.CatracaPage"
+             xmlns:vm="clr-namespace:AcademiaDoZe.Presentation.AppMaui.ViewModels"
+             xmlns:converters="clr-namespace:AcademiaDoZe.Presentation.AppMaui.Converters"
+             x:DataType="vm:CatracaViewModel"
+             x:Name="Pagina"
+             Title="{Binding Title}">
+
+    <!-- Recursos locais: converters e os templates de pessoa (busca) e de presença (na academia agora).
+         Os botões dos templates usam o BindingContext da página (x:Reference Pagina) para chegar aos
+         comandos do ViewModel, passando o próprio item como parâmetro. -->
+    <ContentPage.Resources>
+        <converters:FotoToImageSourceConverter x:Key="FotoToImageSourceConverter"/>
+        <converters:MascaraConverter x:Key="Mascara"/>
+
+        <DataTemplate x:Key="PessoaItemTemplate" x:DataType="vm:PessoaCatracaItem">
+            <Border Style="{StaticResource CardBorder}" Padding="14">
+                <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" ColumnSpacing="14" RowSpacing="12">
+
+                    <!-- Foto (ícone de pessoa por trás enquanto não há imagem) -->
+                    <Border Grid.Row="0" Grid.Column="0" WidthRequest="{OnIdiom Phone=56, Default=64}" HeightRequest="{OnIdiom Phone=56, Default=64}"
+                            StrokeThickness="0" StrokeShape="RoundRectangle 16" Padding="0"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource CampoClaro}, Dark={StaticResource CampoEscuro}}">
+                        <Grid>
+                            <Label Text="&#xe7fd;" Style="{StaticResource Icone}" FontSize="28" HorizontalOptions="Center" VerticalOptions="Center"/>
+                            <Image Source="{Binding Foto, Converter={StaticResource FotoToImageSourceConverter}}" Aspect="AspectFill"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Nome completo, CPF, detalhe (tipo/vínculo/jornada) e selo "Na academia" -->
+                    <VerticalStackLayout Grid.Row="0" Grid.Column="1" Spacing="4" VerticalOptions="Center">
+                        <Label Text="{Binding Nome}" Style="{StaticResource TituloCard}" LineBreakMode="WordWrap"/>
+                        <Label Text="{Binding Cpf, Converter={StaticResource Mascara}, ConverterParameter=Cpf, StringFormat='CPF {0}'}" Style="{StaticResource TextoSecundario}" FontSize="12"/>
+                        <HorizontalStackLayout Spacing="6">
+                            <Border Style="{StaticResource Badge}">
+                                <Label Text="{Binding Detalhe}" FontFamily="OpenSansSemibold" FontSize="11" TextColor="{StaticResource AzulClaro}"/>
+                            </Border>
+                            <Border Style="{StaticResource Badge}" BackgroundColor="#1F22C55E" Stroke="#6622C55E" IsVisible="{Binding NaAcademia}">
+                                <Label Text="Na academia" FontFamily="OpenSansSemibold" FontSize="11" TextColor="{StaticResource Sucesso}"/>
+                            </Border>
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+
+                    <!-- Ações da catraca -->
+                    <Grid Grid.Row="1" Grid.ColumnSpan="2" ColumnDefinitions="*,*" ColumnSpacing="10">
+                        <Button Grid.Column="0" Text="Entrada" Style="{StaticResource ButtonPrimary}"
+                                Command="{Binding BindingContext.RegistrarEntradaCommand, Source={x:Reference Pagina}, x:DataType=ContentPage}"
+                                CommandParameter="{Binding .}">
+                            <Button.ImageSource>
+                                <FontImageSource FontFamily="MaterialIcons" Glyph="&#xea77;" Color="{StaticResource White}"/>
+                            </Button.ImageSource>
+                        </Button>
+                        <Button Grid.Column="1" Text="Saída" Style="{StaticResource ButtonSecondary}"
+                                Command="{Binding BindingContext.RegistrarSaidaCommand, Source={x:Reference Pagina}, x:DataType=ContentPage}"
+                                CommandParameter="{Binding .}">
+                            <Button.ImageSource>
+                                <FontImageSource FontFamily="MaterialIcons" Glyph="&#xe9ba;" Color="{AppThemeBinding Light={StaticResource TextoClaro}, Dark={StaticResource TextoEscuro}}"/>
+                            </Button.ImageSource>
+                        </Button>
+                    </Grid>
+                </Grid>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="PresencaItemTemplate" x:DataType="vm:PresencaItem">
+            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" Padding="0,8">
+                <Border Grid.Column="0" WidthRequest="42" HeightRequest="42" StrokeThickness="0" StrokeShape="RoundRectangle 21" Padding="0"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource CampoClaro}, Dark={StaticResource CampoEscuro}}">
+                    <Grid>
+                        <Label Text="&#xe7fd;" Style="{StaticResource Icone}" FontSize="22" HorizontalOptions="Center" VerticalOptions="Center"/>
+                        <Image Source="{Binding Foto, Converter={StaticResource FotoToImageSourceConverter}}" Aspect="AspectFill"/>
+                    </Grid>
+                </Border>
+                <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                    <Label Text="{Binding Nome}" FontFamily="OpenSansSemibold" FontSize="14" LineBreakMode="TailTruncation"/>
+                    <Label Style="{StaticResource TextoSecundario}" FontSize="12">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="{Binding TipoTexto}" FontFamily="OpenSansSemibold"/>
+                                <Span Text=" · "/>
+                                <Span Text="{Binding EntradaTexto}"/>
+                                <Span Text=" · "/>
+                                <Span Text="{Binding TempoTexto}"/>
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                </VerticalStackLayout>
+                <Button Grid.Column="2" Style="{StaticResource ButtonSmall}" ToolTipProperties.Text="Registrar saída" VerticalOptions="Center"
+                        Command="{Binding BindingContext.RegistrarSaidaPresenteCommand, Source={x:Reference Pagina}, x:DataType=ContentPage}"
+                        CommandParameter="{Binding .}">
+                    <Button.ImageSource>
+                        <FontImageSource FontFamily="MaterialIcons" Glyph="&#xe9ba;" Color="{StaticResource White}"/>
+                    </Button.ImageSource>
+                </Button>
+            </Grid>
+        </DataTemplate>
+    </ContentPage.Resources>
+
+    <!-- Estrutura: cabeçalho (tipo + busca), resultado da catraca e, abaixo, busca + "na academia agora".
+         No celular as duas listas ficam empilhadas; nos demais dispositivos, lado a lado. -->
+    <Grid RowDefinitions="Auto,Auto,*" Padding="24,18,24,12" RowSpacing="14">
+
+        <!-- Cabeçalho: segmento Aluno/Colaborador + busca por CPF ou nome -->
+        <Border Grid.Row="0" Style="{StaticResource CardBorder}" Padding="10">
+            <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto" ColumnSpacing="10" RowSpacing="10">
+                <HorizontalStackLayout Grid.Row="0" Grid.ColumnSpan="2" Spacing="10">
+                    <Label Text="Catraca de" Style="{StaticResource RotuloMaiusculo}" FontSize="11" VerticalOptions="Center"/>
+                    <Border Style="{StaticResource CampoBorda}">
+                        <HorizontalStackLayout Spacing="2">
+                            <Button Text="Aluno" Style="{StaticResource ButtonSegmento}" Command="{Binding SelecionarTipoCommand}" CommandParameter="Aluno">
+                                <Button.Triggers>
+                                    <DataTrigger TargetType="Button" Binding="{Binding IsAluno}" Value="True">
+                                        <Setter Property="BackgroundColor" Value="{StaticResource AzulEscuro}"/>
+                                        <Setter Property="TextColor" Value="{StaticResource White}"/>
+                                    </DataTrigger>
+                                </Button.Triggers>
+                            </Button>
+                            <Button Text="Colaborador" Style="{StaticResource ButtonSegmento}" Command="{Binding SelecionarTipoCommand}" CommandParameter="Colaborador">
+                                <Button.Triggers>
+                                    <DataTrigger TargetType="Button" Binding="{Binding IsColaborador}" Value="True">
+                                        <Setter Property="BackgroundColor" Value="{StaticResource AzulEscuro}"/>
+                                        <Setter Property="TextColor" Value="{StaticResource White}"/>
+                                    </DataTrigger>
+                                </Button.Triggers>
+                            </Button>
+                        </HorizontalStackLayout>
+                    </Border>
+                </HorizontalStackLayout>
+                <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource CampoBorda}" Padding="10,0">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6">
+                        <Label Grid.Column="0" Text="&#xe8b6;" Style="{StaticResource Icone}" TextColor="{AppThemeBinding Light={StaticResource TextoSecClaro}, Dark={StaticResource TextoSecEscuro}}"/>
+                        <Entry Grid.Column="1" Text="{Binding SearchText}" Placeholder="{Binding SearchPlaceholder}" VerticalOptions="Center" ClearButtonVisibility="WhileEditing" ReturnCommand="{Binding BuscarCommand}"/>
+                    </Grid>
+                </Border>
+                <Button Grid.Row="1" Grid.Column="1" Text="Buscar" Command="{Binding BuscarCommand}" Style="{StaticResource ButtonPrimary}">
+                    <Button.ImageSource>
+                        <FontImageSource FontFamily="MaterialIcons" Glyph="&#xe8b6;" Color="{StaticResource White}"/>
+                    </Button.ImageSource>
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- Resultado da última passagem pela catraca: verde liberado, vermelho negado, âmbar jornada ultrapassada -->
+        <Border Grid.Row="1" IsVisible="{Binding TemResultado}" BackgroundColor="{Binding ResultadoFundo}" Stroke="{Binding ResultadoCor}"
+                StrokeThickness="1.5" StrokeShape="RoundRectangle 16" Padding="16,14">
+            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                <Label Grid.Column="0" Text="{Binding ResultadoIcone}" FontFamily="MaterialIcons" FontSize="40" TextColor="{Binding ResultadoCor}" VerticalOptions="Start"/>
+                <VerticalStackLayout Grid.Column="1" Spacing="4">
+                    <Label Text="{Binding Resultado.Titulo}" FontFamily="OpenSansSemibold" FontSize="22" TextColor="{Binding ResultadoCor}"/>
+                    <Label Text="{Binding Resultado.NomePessoa}" Style="{StaticResource TituloCard}"/>
+                    <Label Text="{Binding Resultado.Mensagem}" FontSize="14" LineBreakMode="WordWrap"/>
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding ResultadoDetalhes}" Spacing="4" Margin="0,6,0,0">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:DetalheResultado">
+                                <HorizontalStackLayout Spacing="8">
+                                    <Label Text="{Binding Icone}" Style="{StaticResource Icone}" FontSize="16"/>
+                                    <Label Text="{Binding Texto}" FontSize="13" VerticalOptions="Center"/>
+                                </HorizontalStackLayout>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+                <Button Grid.Column="2" Style="{StaticResource ButtonSecondary}" Command="{Binding FecharResultadoCommand}" ToolTipProperties.Text="Fechar"
+                        VerticalOptions="Start" WidthRequest="40" HeightRequest="40" Padding="0">
+                    <Button.ImageSource>
+                        <FontImageSource FontFamily="MaterialIcons" Glyph="&#xe5cd;" Color="{AppThemeBinding Light={StaticResource TextoClaro}, Dark={StaticResource TextoEscuro}}"/>
+                    </Button.ImageSource>
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- Listas: pessoas encontradas e quem está na academia agora -->
+        <Grid Grid.Row="2" ColumnSpacing="16" RowSpacing="14"
+              ColumnDefinitions="{OnIdiom Phone='*', Default='1.5*,*'}"
+              RowDefinitions="{OnIdiom Phone='*,Auto', Default='*'}">
+
+            <!-- Pessoas (resultado da busca) -->
+            <Grid Grid.Row="0" Grid.Column="0" RowDefinitions="Auto,*" RowSpacing="8">
+                <Label Grid.Row="0" Style="{StaticResource TextoSecundario}">
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="{Binding TituloLista}" FontFamily="OpenSansSemibold"/>
+                            <Span Text="{Binding Pessoas.Count, StringFormat=' · {0} na lista'}"/>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+                <RefreshView Grid.Row="1" IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}">
+                    <CollectionView ItemsSource="{Binding Pessoas}" SelectionMode="None" ItemTemplate="{StaticResource PessoaItemTemplate}">
+                        <CollectionView.ItemsLayout>
+                            <GridItemsLayout Orientation="Vertical" HorizontalItemSpacing="12" VerticalItemSpacing="12"
+                                             Span="{OnIdiom Phone=1, Tablet=1, Desktop=2, TV=3, Default=1}"/>
+                        </CollectionView.ItemsLayout>
+                        <CollectionView.EmptyView>
+                            <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="10" Padding="20">
+                                <Label Text="&#xe7fd;" Style="{StaticResource Icone}" FontSize="48" HorizontalOptions="Center" Opacity="0.5"/>
+                                <Label Text="Ninguém encontrado" Style="{StaticResource SubHeadline}" FontSize="18"/>
+                            </VerticalStackLayout>
+                        </CollectionView.EmptyView>
+                    </CollectionView>
+                </RefreshView>
+            </Grid>
+
+            <!-- Na academia agora (alunos e colaboradores com entrada sem saída) -->
+            <Border Grid.Row="{OnIdiom Phone=1, Default=0}" Grid.Column="{OnIdiom Phone=0, Default=1}"
+                    Style="{StaticResource CardBorder}" Padding="16" VerticalOptions="{OnIdiom Phone=End, Default=Fill}"
+                    MaximumHeightRequest="{OnIdiom Phone=260, Default=100000}">
+                <Grid RowDefinitions="Auto,*" RowSpacing="6">
+                    <HorizontalStackLayout Grid.Row="0" Spacing="8">
+                        <Label Text="&#xeb4f;" Style="{StaticResource Icone}" FontSize="18"/>
+                        <Label Text="Na academia agora" Style="{StaticResource TituloCard}"/>
+                        <Border Style="{StaticResource Badge}">
+                            <Label Text="{Binding Presentes.Count}" FontFamily="OpenSansSemibold" FontSize="11" TextColor="{StaticResource AzulClaro}"/>
+                        </Border>
+                    </HorizontalStackLayout>
+                    <CollectionView Grid.Row="1" ItemsSource="{Binding Presentes}" SelectionMode="None" ItemTemplate="{StaticResource PresencaItemTemplate}">
+                        <CollectionView.EmptyView>
+                            <Label Text="Ninguém na academia no momento." Style="{StaticResource TextoSecundario}" Margin="0,8"/>
+                        </CollectionView.EmptyView>
+                    </CollectionView>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- Loading Indicator -->
+        <ActivityIndicator Grid.Row="0" Grid.RowSpan="3" IsVisible="{Binding IsBusy}" IsRunning="{Binding IsBusy}" VerticalOptions="Center" HorizontalOptions="Center"/>
+    </Grid>
+</ContentPage>

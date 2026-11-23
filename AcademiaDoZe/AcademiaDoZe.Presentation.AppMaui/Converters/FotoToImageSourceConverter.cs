@@ -5,7 +5,8 @@ using System.Globalization;
 namespace AcademiaDoZe.Presentation.AppMaui.Converters;
 
 /// <summary>
-/// Transforma a foto gravada no banco (ArquivoDto, array de bytes) em ImageSource para exibição.
+/// Transforma a foto gravada no banco (ArquivoDto, ou o array de bytes direto, como vem nos DTOs
+/// de acesso) em ImageSource para exibição.
 /// </summary>
 public sealed class FotoToImageSourceConverter : IValueConverter
 {
@@ -13,6 +14,9 @@ public sealed class FotoToImageSourceConverter : IValueConverter
     {
         if (value is ArquivoDto foto && foto.Conteudo is { Length: > 0 } conteudo)
             return ImageSource.FromStream(() => new MemoryStream(conteudo));
+
+        if (value is byte[] { Length: > 0 } bytes)
+            return ImageSource.FromStream(() => new MemoryStream(bytes));
 
         return null;
     }

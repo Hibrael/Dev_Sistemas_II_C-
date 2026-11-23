@@ -40,7 +40,8 @@ namespace AcademiaDoZe.Application.Mappings
                 Senha = null,
                 Foto = aluno.Foto.Conteudo,
                 FotoNomeArquivo = aluno.Foto.Nome,
-                DataHora = entity.DataHora
+                DataHora = entity.DataHora,
+                DataHoraSaida = entity.DataHoraSaida
             };
         }
 
@@ -84,7 +85,7 @@ namespace AcademiaDoZe.Application.Mappings
             // no AtualizarAsync, que senão reescreveria o horário real do acesso com "agora".
             return dto.DataHora == default
                 ? AcessoAluno.Criar(dto.Id, alunoResult.Value!)
-                : AcessoAluno.Restaurar(dto.Id, alunoResult.Value!, dto.DataHora);
+                : AcessoAluno.Restaurar(dto.Id, alunoResult.Value!, dto.DataHora, dto.DataHoraSaida);
         }
 
         private static string FormatErrors(IEnumerable<Notificacoes> notificacoes) =>
